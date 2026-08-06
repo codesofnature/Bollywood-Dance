@@ -2,6 +2,8 @@ import streamlit as st
 import urllib.parse
 import pandas as pd
 import re
+import os
+import datetime
 
 st.set_page_config(
     page_title="BollyFusion Academy",
@@ -66,6 +68,7 @@ AVAILABLE_PROGRAMS = [
     "song_count": "2-3 songs"
   }
 ]
+DB_FILE = "bollyfusion_db.csv"
 
 st.markdown('''
 <style>
@@ -289,35 +292,56 @@ if "app_state" not in st.session_state:
 
 if "current_user" not in st.session_state:
     st.session_state.current_user = {
-        "Name": "", "Email": "", "Program Number": "", "Class": "", "Fee": 0.0, "Stripe Link": ""
+        "Name": "", "Email": "", "Program Number": "-", "Class": "-", "Fee": 0.0, "Stripe Link": ""
     }
 
+# --- Persistent CSV Database Setup ---
 if "student_db" not in st.session_state:
-    st.session_state.student_db = []
+    if os.path.exists(DB_FILE):
+        st.session_state.student_db = pd.read_csv(DB_FILE).to_dict('records')
+    else:
+        st.session_state.student_db = []
 
+def update_db(name, email, prog_num, class_name, status):
+    record = {
+        "Timestamp": datetime.datetime.now().strftime("%Y-%m-%d %I:%M %p"),
+        "Name": name,
+        "Email": email,
+        "Program Number": prog_num,
+        "Class": class_name,
+        "Status": status
+    }
+    st.session_state.student_db.append(record)
+    pd.DataFrame(st.session_state.student_db).to_csv(DB_FILE, index=False)
+# -------------------------------------
 
 def navigate(to_state):
     st.session_state.app_state = to_state
 
 def reset_user():
     st.session_state.current_user = {
-        "Name": "", "Email": "", "Program Number": "", "Class": "", "Fee": 0.0, "Stripe Link": ""
+        "Name": "", "Email": "", "Program Number": "-", "Class": "-", "Fee": 0.0, "Stripe Link": ""
     }
+    st.query_params.clear()
     st.session_state.app_state = "home"
 
-# --- ADD THIS NEW FUNCTION ---
 def process_registration():
-    emails = [student["Email"] for student in st.session_state.student_db]
-    if st.session_state.current_user["Email"] not in emails:
-        st.session_state.student_db.append({
-            "Name": st.session_state.current_user["Name"],
-            "Email": st.session_state.current_user["Email"],
-            "Program Number": "-",
-            "Class": "Browsing Programs...",
-            "Status": "Abandoned Early"
-        })
+    update_db(st.session_state.current_user["Name"], 
+              st.session_state.current_user["Email"], 
+              "-", "Browsing Programs...", "Abandoned Early")
     navigate("classes")
-# -----------------------------
+
+# --- Stripe Success Listener ---
+if "status" in st.query_params and st.query_params["status"] == "success":
+    if st.session_state.app_state != "success":
+        st.session_state.app_state = "success"
+        if st.session_state.current_user.get("Email"):
+            update_db(st.session_state.current_user["Name"],
+                      st.session_state.current_user["Email"],
+                      st.session_state.current_user["Program Number"],
+                      st.session_state.current_user["Class"],
+                      "Paid ✅")
+# -------------------------------
 
 
 if st.session_state.app_state == "home":
@@ -352,12 +376,10 @@ elif st.session_state.app_state == "register":
 
     st.write("")
 
-    # --- NEW REGEX EMAIL VALIDATION ---
     email_pattern = r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"
     is_valid_email = bool(re.match(email_pattern, st.session_state.current_user["Email"]))
     
     valid = (st.session_state.current_user["Name"].strip() != "" and is_valid_email)
-    # ----------------------------------
 
     col1, col2 = st.columns(2)
     with col1:
@@ -406,14 +428,9 @@ elif st.session_state.app_state == "classes":
                     st.session_state.current_user["Fee"] = prog["fee"]
                     st.session_state.current_user["Stripe Link"] = prog["stripe_link"]
                     
-                    # --- UPDATED LOGGING LOGIC ---
-                    for student in st.session_state.student_db:
-                        if student["Email"] == st.session_state.current_user["Email"]:
-                            student["Program Number"] = prog["id"]
-                            student["Class"] = prog["name"]
-                            student["Status"] = "Pending Payment"
-                            break
-                    # -----------------------------
+                    update_db(st.session_state.current_user["Name"], 
+                              st.session_state.current_user["Email"], 
+                              prog["id"], prog["name"], "Pending Payment")
 
                     navigate("checkout")
 
@@ -430,7 +447,10 @@ elif st.session_state.app_state == "checkout":
 
     selected_class = st.session_state.current_user.get("Class", "")
     selected_fee = st.session_state.current_user.get("Fee", 0)
+    
+    # Pre-fill user email in Stripe checkout automatically
     stripe_link = st.session_state.current_user.get("Stripe Link", "#")
+    checkout_url = f"{stripe_link}?prefilled_email={urllib.parse.quote(st.session_state.current_user.get('Email', ''))}"
 
     st.markdown(f'''
     <div class="bf-summary">
@@ -472,7 +492,7 @@ elif st.session_state.app_state == "checkout":
         if can_pay:
             st.link_button(
                 f"💳 Pay ${selected_fee:,.2f} via Stripe",
-                url=stripe_link,
+                url=checkout_url,
                 use_container_width=True,
                 type="primary"
             )
@@ -538,14 +558,15 @@ elif st.session_state.app_state == "admin_login":
 
 elif st.session_state.app_state == "admin_dashboard":
     st.markdown(
-        '<div class="bf-section-title"><h2>📊 Admin Portal</h2>'
-        '<p class="bf-muted">Live registration roster for this session.</p></div>',
+        '<div class="bf-section-title"><h2>📊 Specialized Trainer Portal</h2>'
+        '<p class="bf-muted">Live event log of all student interactions.</p></div>',
         unsafe_allow_html=True
     )
 
-    if st.session_state.student_db:
-        df = pd.DataFrame(st.session_state.student_db)
-        df = df[["Name", "Email", "Program Number", "Class", "Status"]]
+    if os.path.exists(DB_FILE):
+        df = pd.read_csv(DB_FILE)
+        # Reverse the dataframe to show the newest entries at the top
+        df = df.iloc[::-1]
         st.dataframe(df, use_container_width=True, hide_index=True)
 
         csv = df.to_csv(index=False).encode("utf-8")
