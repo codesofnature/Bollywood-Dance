@@ -275,11 +275,10 @@ def reset_user():
 if st.session_state.app_state == "home":
     st.markdown('''
     <div class="bf-hero">
-        <div class="bf-pill">🎬 BollyFusion Academy</div>
-        <h1>Cinematic dance, <span class="bf-gradient">built for every stage</span></h1>
+        <div class="bf-pill">🎬 BollyFusion Dance Studio</div>
+        <h1>Energetic dance programs for all, <span class="bf-gradient">built for every stage</span></h1>
         <p class="bf-muted">
             Register, choose a program, accept waivers, and receive a QR studio pass.
-            Optimized for iPhone, Android, and desktop.
         </p>
     </div>
     ''', unsafe_allow_html=True)
@@ -316,7 +315,6 @@ elif st.session_state.app_state == "register":
 
 elif st.session_state.app_state == "classes":
     st.markdown(
-
         unsafe_allow_html=True
     )
 
