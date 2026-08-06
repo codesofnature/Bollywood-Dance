@@ -26,7 +26,7 @@ AVAILABLE_PROGRAMS = [
     "hours": 1.0,
     "weeks": 20,
     "fee": 500.0,
-    "stripe_link": "https://buy.stripe.com/test_bolly_cardio_2_500",
+    "stripe_link": "https://buy.stripe.com/00waEX3CA8EQapr1MW9R604",
     "poster": "https://github.com/codesofnature/Bollywood-Dance/blob/main/2.jpg?raw=true",
     "desc": "Level up your stamina with complex beats and faster choreography.",
     "song_count": "4-5 songs"
@@ -39,7 +39,7 @@ AVAILABLE_PROGRAMS = [
     "fee": 1500.0,
     "stripe_link": "https://buy.stripe.com/test_couples_event_1500",
     "poster": "https://github.com/codesofnature/Bollywood-Dance/blob/main/3.jpg?raw=true",
-    "desc": "Perfect for weddings! Master partner choreography with elegance and grace.",
+    "desc": "Perfect for events/weddings/performances! Master partner choreography with elegance and grace.",
     "song_count": "2-3 songs"
   },
   {
@@ -50,7 +50,7 @@ AVAILABLE_PROGRAMS = [
     "fee": 1000.0,
     "stripe_link": "https://buy.stripe.com/test_group_event_1000",
     "poster": "https://github.com/codesofnature/Bollywood-Dance/blob/main/4.jpg?raw=true",
-    "desc": "Coordinate stunning group routines for your next big celebration.",
+    "desc": "Coordinate stunning group routines for your next big celebration or event.",
     "song_count": "2-3 songs"
   },
   {
@@ -58,10 +58,10 @@ AVAILABLE_PROGRAMS = [
     "name": "Bolly Kids 7-17",
     "hours": 1.0,
     "weeks": 12,
-    "fee": 500.0,
+    "fee": 350.0,
     "stripe_link": "https://buy.stripe.com/test_elite_fusion_2500",
     "poster": "https://github.com/codesofnature/Bollywood-Dance/blob/main/5.jpg?raw=true",
-    "desc": "Advanced fusion techniques for aspiring competitive performers.",
+    "desc": "High energy dance for the youngster techniques for aspiring competitive performers.",
     "song_count": "2-3 songs"
   },
   {
