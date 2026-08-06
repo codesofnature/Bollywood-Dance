@@ -275,10 +275,11 @@ def reset_user():
 if st.session_state.app_state == "home":
     st.markdown('''
     <div class="bf-hero">
-        <div class="bf-pill">🎬 BollyFusion Dance Studio</div>
-        <h1>Energetic dance programs for all, <span class="bf-gradient">built for every stage</span></h1>
+        <div class="bf-pill">🎬 BollyFusion Academy</div>
+        <h1>Cinematic dance, <span class="bf-gradient">built for every stage</span></h1>
         <p class="bf-muted">
             Register, choose a program, accept waivers, and receive a QR studio pass.
+            Optimized for iPhone, Android, and desktop.
         </p>
     </div>
     ''', unsafe_allow_html=True)
@@ -289,7 +290,7 @@ if st.session_state.app_state == "home":
     with col1:
         st.button("Register & Enroll", use_container_width=True, type="primary", on_click=navigate, args=("register",))
     with col2:
-        st.button("Admin Portal", use_container_width=True, type="primary", on_click=navigate, args=("admin_login",))
+        st.button("Admin Portal", use_container_width=True, on_click=navigate, args=("admin_login",))
 
 
 elif st.session_state.app_state == "register":
@@ -317,12 +318,6 @@ elif st.session_state.app_state == "classes":
     st.markdown(
         '<div class="bf-section-title"><h2>Choose a Program</h2>'
         '<p class="bf-muted">Tap a program to continue to secure checkout.</p></div>',
-        unsafe_allow_html=True
-    )
-
-
-elif st.session_state.app_state == "classes":
-    st.markdown(
         unsafe_allow_html=True
     )
 
