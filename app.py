@@ -101,32 +101,24 @@ elif st.session_state.app_state == 'classes':
     </style>
     """, unsafe_allow_html=True)
     
-    # Scrollable container mapping dynamically through items
     with st.container(height=650, border=False):
         cols = st.columns(2)
         for idx, prog in enumerate(AVAILABLE_PROGRAMS):
             with cols[idx % 2]:
+                # NOTE: Indentation removed inside HTML string to prevent Streamlit Markdown escaping
                 st.markdown(f"""
-                <div class='program-card'>
-                    <div style='position: relative; cursor: pointer;'>
-                        <img src='{prog["poster"]}' style='width:100%; border-radius:8px;'>
-                        
-                        <!-- Floating Touch Circle Indicator -->
-                        <div style='position:absolute; top:50%; left:50%; transform: translate(-50%, -50%); 
-                                    background:rgba(255,255,255,0.9); border-radius:50%; width:50px; height:50px; 
-                                    display:flex; justify-content:center; align-items:center; 
-                                    box-shadow:0 4px 15px rgba(0,0,0,0.6); font-size:24px; border: 2px solid #fbbf24;'>
-                            👆
-                        </div>
-                    </div>
-                    <h4 style='margin-top:10px; margin-bottom:5px; font-size: 16px;'>{prog['name']}</h4>
-                    <p style='font-size: 12px; color: gray; margin-bottom: 5px;'>{prog['weeks']} Weeks | {prog['hours']} hrs/wk</p>
-                    <p style='font-size: 12px; margin-bottom: 10px;'>{prog['desc']}</p>
-                    <p style='font-size: 14px; font-weight: bold; color: #10b981;'>${prog['fee']:,.2f}</p>
-                </div>
-                """, unsafe_allow_html=True)
+<div class='program-card'>
+<div style='position: relative; cursor: pointer;'>
+<img src='{prog["poster"]}' style='width:100%; border-radius:8px;'>
+<div style='position:absolute; top:50%; left:50%; transform: translate(-50%, -50%); background:rgba(255,255,255,0.9); border-radius:50%; width:50px; height:50px; display:flex; justify-content:center; align-items:center; box-shadow:0 4px 15px rgba(0,0,0,0.6); font-size:24px; border: 2px solid #fbbf24;'>👆</div>
+</div>
+<h4 style='margin-top:10px; margin-bottom:5px; font-size: 16px;'>{prog['name']}</h4>
+<p style='font-size: 12px; color: gray; margin-bottom: 5px;'>{prog['weeks']} Weeks | {prog['hours']} hrs/wk</p>
+<p style='font-size: 12px; margin-bottom: 10px;'>{prog['desc']}</p>
+<p style='font-size: 14px; font-weight: bold; color: #10b981;'>${prog['fee']:,.2f}</p>
+</div>
+""", unsafe_allow_html=True)
                 
-                # Dedicated select button simulating the touch selection purely
                 if st.button(f"👆 Tap to Select {prog['name']}", key=f"enroll_{prog['prog_num']}", use_container_width=True, type="primary"):
                     st.session_state.current_user["Class"] = prog["name"]
                     st.session_state.current_user["Program #"] = prog["prog_num"]
@@ -147,12 +139,10 @@ elif st.session_state.app_state == 'checkout':
     st.markdown("### Legal Agreements")
     st.markdown("Please review and accept all terms below to proceed with payment.")
     
-    # Fully formed legal disclaimers
     waiver_text = "I hereby acknowledge that dance involves physical exertion and risk of injury. I expressly assume all risks associated with participating in BollyFusion Academy programs. I release the studio, its instructors, and affiliates from any and all liability, claims, or demands arising from injury or harm."
     media_text = "I grant BollyFusion Academy the irrevocable right and permission to use photographs and/or video recordings of me on studio and other websites and in publications, promotional flyers, educational materials, derivative works, or for any other similar purpose without compensation."
     refund_text = "I understand and agree to the studio's refund policy: A free refund is given after 2 weeks of the program commencement. No refunds or prorations will be provided outside of this designated window."
     
-    # Mandating explicit checkboxes for each legal block
     cb1 = st.checkbox("I agree to the Physical Activity & Liability Waiver", help=waiver_text)
     st.caption(waiver_text)
     
@@ -168,7 +158,6 @@ elif st.session_state.app_state == 'checkout':
     with col1:
         st.button("Back", use_container_width=True, on_click=navigate, args=('classes',))
     with col2:
-        # Require all three boxes to be checked to enable Apple Pay checkout
         if cb1 and cb2 and cb3:
             def process_payment():
                 st.session_state.student_db.append({
@@ -213,7 +202,6 @@ elif st.session_state.app_state == 'admin_login':
     st.title("🔒 Admin Login")
     st.markdown("Hardcoded secure portal access.")
     
-    # Hardcoded credentials input
     a_user = st.text_input("Username")
     a_pass = st.text_input("Password", type="password")
     
@@ -235,7 +223,6 @@ elif st.session_state.app_state == 'admin_dashboard':
     
     if len(st.session_state.student_db) > 0:
         df_students = pd.DataFrame(st.session_state.student_db)
-        # Ensure optimal column ordering 
         df_students = df_students[['Name', 'Email', 'Program #', 'Class', 'Status']]
         st.dataframe(df_students, use_container_width=True, hide_index=True)
     else:
