@@ -57,12 +57,11 @@ html, body, [class*="css"] {
     font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
-/* Bollywood Theme Update */
 .stApp {
     background:
-        radial-gradient(circle at top left, rgba(224, 17, 95, .20), transparent 40%),
-        radial-gradient(circle at top right, rgba(255, 153, 51, .20), transparent 40%),
-        #1a0505;
+        radial-gradient(circle at top left, rgba(255, 95, 162, .16), transparent 30%),
+        radial-gradient(circle at top right, rgba(85, 198, 255, .14), transparent 25%),
+        #07070f;
     color: #f9fafb;
 }
 
@@ -78,7 +77,6 @@ input, textarea, select {
     font-size: 16px !important;
 }
 
-/* Base button styling */
 button {
     min-height: 50px;
     border-radius: 16px !important;
@@ -91,27 +89,10 @@ button {
     font-size: 16px;
 }
 
-/* Secondary Button Overrides (Prevents them turning white) */
-button[kind="secondary"], button[kind="secondary"]:hover, button[kind="secondary"]:active, button[kind="secondary"]:focus {
-    background: rgba(255, 255, 255, 0.1) !important;
-    color: #ffffff !important;
-    border: 1px solid rgba(255, 255, 255, 0.3) !important;
-}
-button[kind="secondary"]:hover {
-    background: rgba(255, 255, 255, 0.2) !important;
-    border: 1px solid #ffffff !important;
-}
-
-/* Primary Button Overrides (Continue, Checkout, Register) */
-button[kind="primary"], button[kind="primary"]:hover, button[kind="primary"]:active, button[kind="primary"]:focus {
-    background: linear-gradient(90deg, #FF9933, #E0115F) !important;
-    color: #ffffff !important;
+button[kind="primary"] {
+    background: linear-gradient(90deg, #ffcf5f, #ff5fa2) !important;
+    color: #171204 !important;
     border: none !important;
-    box-shadow: 0 4px 15px rgba(224, 17, 95, 0.4) !important;
-}
-button[kind="primary"]:hover {
-    background: linear-gradient(90deg, #FFB057, #F02373) !important;
-    box-shadow: 0 6px 20px rgba(224, 17, 95, 0.6) !important;
 }
 
 #MainMenu {
@@ -127,7 +108,7 @@ footer {
     padding: 32px 20px;
     border: 1px solid rgba(255, 255, 255, .12);
     background:
-        linear-gradient(135deg, rgba(224, 17, 95, .18), rgba(255, 153, 51, .12), rgba(255, 215, 0, .14));
+        linear-gradient(135deg, rgba(255, 95, 162, .18), rgba(85, 198, 255, .12), rgba(255, 207, 95, .14));
     text-align: center;
     margin-bottom: 18px;
 }
@@ -150,9 +131,8 @@ footer {
     letter-spacing: -.04em;
 }
 
-/* Gold/Magenta/Orange text gradient */
 .bf-gradient {
-    background: linear-gradient(90deg, #FFD700, #E0115F, #FF9933);
+    background: linear-gradient(90deg, #ffcf5f, #ff5fa2, #55c6ff);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -178,7 +158,7 @@ footer {
 .bf-media {
     position: relative;
     aspect-ratio: 16 / 10;
-    background: linear-gradient(135deg, rgba(224, 17, 95, .35), rgba(255, 153, 51, .28));
+    background: linear-gradient(135deg, rgba(255, 95, 162, .35), rgba(85, 198, 255, .28));
 }
 
 .bf-media img {
@@ -212,7 +192,7 @@ footer {
     bottom: 12px;
     left: auto;
     right: 12px;
-    background: rgba(255, 215, 0, .18);
+    background: rgba(255, 207, 95, .18);
 }
 
 .bf-body {
@@ -243,7 +223,7 @@ footer {
 .bf-price {
     font-size: 1.25rem;
     font-weight: 900;
-    color: #FFD700;
+    color: #43e97b;
     margin-top: 8px;
 }
 
@@ -268,7 +248,7 @@ footer {
     padding: 20px;
     border-radius: 24px;
     background:
-        linear-gradient(135deg, rgba(255, 215, 0, .12), rgba(224, 17, 95, .12), rgba(255, 153, 51, .12));
+        linear-gradient(135deg, rgba(255, 207, 95, .12), rgba(255, 95, 162, .12), rgba(85, 198, 255, .12));
     border: 1px solid rgba(255, 255, 255, .12);
     margin-bottom: 16px;
 }
@@ -289,7 +269,7 @@ footer {
     }
 }
 </style>
-'''
+''', unsafe_allow_html=True)
 
 if "app_state" not in st.session_state:
     st.session_state.app_state = "home"
