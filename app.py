@@ -97,6 +97,19 @@ button[kind="primary"] {
     color: #ffffff !important;
     border: none !important;
     box-shadow: 0 4px 15px rgba(255, 0, 127, 0.3);
+    transition: opacity 0.15s ease !important;
+}
+
+/* Keep the same gradient while disabled (e.g. form not yet valid) instead of
+   falling back to Streamlit's default white/grey disabled button, which is
+   what causes the "white, then changes color" flash as the user fills the form. */
+button[kind="primary"]:disabled,
+button[kind="primary"][disabled] {
+    background: linear-gradient(90deg, #ff007f, #ffaa00) !important;
+    color: #ffffff !important;
+    opacity: 0.45 !important;
+    box-shadow: none !important;
+    cursor: not-allowed !important;
 }
 
 /* Specific styling applied to Apple Pay checkout button state */
@@ -370,6 +383,21 @@ elif st.session_state.app_state == "checkout":
         font-size: 22px !important;
         box-shadow: none !important;
         border: 1px solid #333 !important;
+    }
+
+    /* Keep the black Apple-Pay look while disabled (waivers not yet all
+       checked), instead of falling back to the default white disabled
+       button, which is what causes the "white, then turns black" flash. */
+    div[data-testid="stButton"] button[kind="primary"]:disabled,
+    div[data-testid="stButton"] button[kind="primary"][disabled] {
+        background: #000000 !important;
+        color: #ffffff !important;
+        border-radius: 8px !important;
+        font-size: 22px !important;
+        box-shadow: none !important;
+        border: 1px solid #333 !important;
+        opacity: 0.45 !important;
+        cursor: not-allowed !important;
     }
     </style>
     ''', unsafe_allow_html=True)
