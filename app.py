@@ -55,14 +55,25 @@ AVAILABLE_PROGRAMS = [
   },
   {
     "id": "5",
-    "name": "Elite Fusion Troupe",
+    "name": "Bolly Kids 7-17",
     "hours": 1.0,
-    "weeks": 10,
+    "weeks": 12,
     "fee": 500.0,
     "stripe_link": "https://buy.stripe.com/test_elite_fusion_2500",
     "poster": "https://github.com/codesofnature/Bollywood-Dance/blob/main/5.jpg?raw=true",
     "desc": "Advanced fusion techniques for aspiring competitive performers.",
     "song_count": "2-3 songs"
+  },
+  {
+    "id": "6",
+    "name": "Premier Company",
+    "hours": 13.0,
+    "weeks": 20,
+    "fee": 3000.0,
+    "stripe_link": "https://buy.stripe.com/test_premier_company_3000",
+    "poster": "https://images.unsplash.com/photo-1504609774574-8b6540c749eb?auto=format&fit=crop&w=800&q=80",
+    "desc": "Our flagship professional company. Stage-ready cinematic perfection.",
+    "song_count": "4-5 songs"
   }
 ]
 
