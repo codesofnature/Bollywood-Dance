@@ -80,7 +80,7 @@ elif st.session_state.app_state == 'register':
     st.session_state.current_user["Name"] = st.text_input("Full Name", value=st.session_state.current_user.get("Name", ""), placeholder="Jane Doe")
     st.session_state.current_user["Email"] = st.text_input("Email", value=st.session_state.current_user.get("Email", ""), placeholder="jane@example.com")
     
-    st.markdown("<br>", unsafe_allow_html=True)
+    st.write("")
     col1, col2 = st.columns(2)
     with col1:
         st.button("Back", use_container_width=True, on_click=navigate, args=('home',))
@@ -95,29 +95,16 @@ elif st.session_state.app_state == 'classes':
     st.title("Choose a Program")
     st.markdown("Browse our offerings. **Tap the select button right under the image** to enroll.")
     
-    st.markdown("""
-    <style>
-    .program-card { border: 1px solid #ddd; border-radius: 10px; padding: 10px; margin-bottom: 20px; background: white; }
-    </style>
-    """, unsafe_allow_html=True)
+    # CSS compressed to single line to avoid Streamlit markdown parsing errors
+    st.markdown("<style>.program-card { border: 1px solid #ddd; border-radius: 10px; padding: 10px; margin-bottom: 20px; background: white; }</style>", unsafe_allow_html=True)
     
     with st.container(height=650, border=False):
         cols = st.columns(2)
         for idx, prog in enumerate(AVAILABLE_PROGRAMS):
             with cols[idx % 2]:
-                # NOTE: Indentation removed inside HTML string to prevent Streamlit Markdown escaping
-                st.markdown(f"""
-<div class='program-card'>
-<div style='position: relative; cursor: pointer;'>
-<img src='{prog["poster"]}' style='width:100%; border-radius:8px;'>
-<div style='position:absolute; top:50%; left:50%; transform: translate(-50%, -50%); background:rgba(255,255,255,0.9); border-radius:50%; width:50px; height:50px; display:flex; justify-content:center; align-items:center; box-shadow:0 4px 15px rgba(0,0,0,0.6); font-size:24px; border: 2px solid #fbbf24;'>👆</div>
-</div>
-<h4 style='margin-top:10px; margin-bottom:5px; font-size: 16px;'>{prog['name']}</h4>
-<p style='font-size: 12px; color: gray; margin-bottom: 5px;'>{prog['weeks']} Weeks | {prog['hours']} hrs/wk</p>
-<p style='font-size: 12px; margin-bottom: 10px;'>{prog['desc']}</p>
-<p style='font-size: 14px; font-weight: bold; color: #10b981;'>${prog['fee']:,.2f}</p>
-</div>
-""", unsafe_allow_html=True)
+                # HTML block squashed to a strictly formatted single-line string to prevent copy-paste indentation breaks
+                card_html = f"<div class='program-card'><div style='position: relative; cursor: pointer;'><img src='{prog['poster']}' style='width:100%; border-radius:8px;'><div style='position:absolute; top:50%; left:50%; transform: translate(-50%, -50%); background:rgba(255,255,255,0.9); border-radius:50%; width:50px; height:50px; display:flex; justify-content:center; align-items:center; box-shadow:0 4px 15px rgba(0,0,0,0.6); font-size:24px; border: 2px solid #fbbf24;'>👆</div></div><h4 style='margin-top:10px; margin-bottom:5px; font-size: 16px;'>{prog['name']}</h4><p style='font-size: 12px; color: gray; margin-bottom: 5px;'>{prog['weeks']} Weeks | {prog['hours']} hrs/wk</p><p style='font-size: 12px; margin-bottom: 10px;'>{prog['desc']}</p><p style='font-size: 14px; font-weight: bold; color: #10b981;'>${prog['fee']:,.2f}</p></div>"
+                st.markdown(card_html, unsafe_allow_html=True)
                 
                 if st.button(f"👆 Tap to Select {prog['name']}", key=f"enroll_{prog['prog_num']}", use_container_width=True, type="primary"):
                     st.session_state.current_user["Class"] = prog["name"]
@@ -125,7 +112,7 @@ elif st.session_state.app_state == 'classes':
                     st.session_state.current_user["Fee"] = prog["fee"]
                     navigate('checkout')
                 
-    st.markdown("<br>", unsafe_allow_html=True)
+    st.write("")
     st.button("Back", on_click=navigate, args=('register',))
 
 # --- 4. SECURE CHECKOUT SCREEN (LEGAL WAIVERS) ---
@@ -152,7 +139,7 @@ elif st.session_state.app_state == 'checkout':
     cb3 = st.checkbox("I agree to the Refund Policy", help=refund_text)
     st.caption(refund_text)
     
-    st.markdown("<br>", unsafe_allow_html=True)
+    st.write("")
     
     col1, col2 = st.columns(2)
     with col1:
@@ -205,7 +192,7 @@ elif st.session_state.app_state == 'admin_login':
     a_user = st.text_input("Username")
     a_pass = st.text_input("Password", type="password")
     
-    st.markdown("<br>", unsafe_allow_html=True)
+    st.write("")
     col1, col2 = st.columns(2)
     with col1:
         st.button("Cancel", use_container_width=True, on_click=navigate, args=('home',))
