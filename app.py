@@ -486,7 +486,7 @@ elif st.session_state.app_state == "success":
 elif st.session_state.app_state == "admin_login":
     st.markdown(
         '<div class="bf-section-title"><h2>🔒 Admin Login</h2>'
-        '<p class="bf-muted">Use manasidharmadhikari / Bestofbollywooddances7925.</p></div>',
+        '<p class="bf-muted">Use admin / admin123.</p></div>',
         unsafe_allow_html=True
     )
 
@@ -500,7 +500,7 @@ elif st.session_state.app_state == "admin_login":
         st.button("Cancel", use_container_width=True, on_click=navigate, args=("home",))
     with col2:
         if st.button("Login", use_container_width=True, type="primary"):
-            if a_user == "admin" and a_pass == "admin123":
+            if a_user == "manasidharmadhikari" and a_pass == "bestofbollywood7925":
                 navigate("admin_dashboard")
             else:
                 st.error("Invalid credentials. Use admin / admin123.")
