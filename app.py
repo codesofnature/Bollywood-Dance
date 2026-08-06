@@ -25,7 +25,7 @@ AVAILABLE_PROGRAMS = [
     "hours": 1.0,
     "weeks": 20,
     "fee": 500.0,
-    "poster": "https://images.unsplash.com/photo-1604882355165-4450cb6155b2?auto=format&fit=crop&w=800&q=80",
+    "poster": "https://github.com/codesofnature/Bollywood-Dance/blob/main/2.jpg?raw=true",
     "desc": "Level up your stamina with complex beats and faster choreography.",
     "song_count": "4-5 songs"
   },
@@ -35,7 +35,7 @@ AVAILABLE_PROGRAMS = [
     "hours": 1.0,
     "weeks": 10,
     "fee": 1500.0,
-    "poster": "https://images.unsplash.com/photo-1583391733975-69273c528659?auto=format&fit=crop&w=800&q=80",
+    "poster": "https://github.com/codesofnature/Bollywood-Dance/blob/main/3.jpg?raw=true",
     "desc": "Perfect for weddings! Master partner choreography with elegance and grace.",
     "song_count": "2-3 songs"
   },
@@ -45,7 +45,7 @@ AVAILABLE_PROGRAMS = [
     "hours": 1.0,
     "weeks": 10,
     "fee": 1000.0,
-    "poster": "https://images.unsplash.com/photo-1517436073-3b1b110bc441?auto=format&fit=crop&w=800&q=80",
+    "poster": "https://github.com/codesofnature/Bollywood-Dance/blob/main/4.jpg?raw=true",
     "desc": "Coordinate stunning group routines for your next big celebration.",
     "song_count": "2-3 songs"
   }
