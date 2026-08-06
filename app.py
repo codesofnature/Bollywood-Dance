@@ -305,6 +305,20 @@ def reset_user():
     }
     st.session_state.app_state = "home"
 
+# --- ADD THIS NEW FUNCTION ---
+def process_registration():
+    emails = [student["Email"] for student in st.session_state.student_db]
+    if st.session_state.current_user["Email"] not in emails:
+        st.session_state.student_db.append({
+            "Name": st.session_state.current_user["Name"],
+            "Email": st.session_state.current_user["Email"],
+            "Program Number": "-",
+            "Class": "Browsing Programs...",
+            "Status": "Abandoned Early"
+        })
+    navigate("classes")
+# -----------------------------
+
 
 if st.session_state.app_state == "home":
     st.markdown('''
@@ -349,7 +363,7 @@ elif st.session_state.app_state == "register":
     with col1:
         st.button("Back", use_container_width=True, on_click=navigate, args=("home",))
     with col2:
-        st.button("Continue", use_container_width=True, type="primary", disabled=not valid, on_click=navigate, args=("classes",))
+        st.button("Continue", use_container_width=True, type="primary", disabled=not valid, on_click=process_registration)
 
 
 elif st.session_state.app_state == "classes":
@@ -392,16 +406,14 @@ elif st.session_state.app_state == "classes":
                     st.session_state.current_user["Fee"] = prog["fee"]
                     st.session_state.current_user["Stripe Link"] = prog["stripe_link"]
                     
-                    # --- NEW LOGGING LOGIC ---
-                    # Logs the user to the admin database regardless of payment completion
-                    st.session_state.student_db.append({
-                        "Name": st.session_state.current_user.get("Name", "Unknown"),
-                        "Email": st.session_state.current_user.get("Email", "Unknown"),
-                        "Program Number": prog["id"],
-                        "Class": prog["name"],
-                        "Status": "Pending Payment"
-                    })
-                    # -------------------------
+                    # --- UPDATED LOGGING LOGIC ---
+                    for student in st.session_state.student_db:
+                        if student["Email"] == st.session_state.current_user["Email"]:
+                            student["Program Number"] = prog["id"]
+                            student["Class"] = prog["name"]
+                            student["Status"] = "Pending Payment"
+                            break
+                    # -----------------------------
 
                     navigate("checkout")
 
