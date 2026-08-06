@@ -289,7 +289,7 @@ if st.session_state.app_state == "home":
     with col1:
         st.button("Register & Enroll", use_container_width=True, type="primary", on_click=navigate, args=("register",))
     with col2:
-        st.button("Admin Portal", use_container_width=True, on_click=navigate, args=("admin_login",))
+        st.button("Admin Portal", use_container_width=True, type="primary", on_click=navigate, args=("admin_login",))
 
 
 elif st.session_state.app_state == "register":
