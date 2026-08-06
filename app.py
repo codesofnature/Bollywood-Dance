@@ -15,7 +15,7 @@ AVAILABLE_PROGRAMS = [
     "hours": 0.5,
     "weeks": 20,
     "fee": 250.0,
-    "poster": "https://images.unsplash.com/photo-1548690312-e3b507d8c110?auto=format&fit=crop&w=800&q=80",
+    "poster": "https://images.unsplash.com/photo-1524117853209-a2fc12850723?auto=format&fit=crop&w=800&q=80",
     "desc": "High-energy entry-level fitness infused with cinematic Bollywood flair.",
     "song_count": "4-5 songs"
   },
@@ -25,7 +25,7 @@ AVAILABLE_PROGRAMS = [
     "hours": 1.0,
     "weeks": 20,
     "fee": 500.0,
-    "poster": "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=800&q=80",
+    "poster": "https://images.unsplash.com/photo-1604882355165-4450cb6155b2?auto=format&fit=crop&w=800&q=80",
     "desc": "Level up your stamina with complex beats and faster choreography.",
     "song_count": "4-5 songs"
   },
@@ -35,7 +35,7 @@ AVAILABLE_PROGRAMS = [
     "hours": 1.0,
     "weeks": 10,
     "fee": 1500.0,
-    "poster": "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80",
+    "poster": "https://images.unsplash.com/photo-1583391733975-69273c528659?auto=format&fit=crop&w=800&q=80",
     "desc": "Perfect for weddings! Master partner choreography with elegance and grace.",
     "song_count": "2-3 songs"
   },
@@ -45,7 +45,7 @@ AVAILABLE_PROGRAMS = [
     "hours": 1.0,
     "weeks": 10,
     "fee": 1000.0,
-    "poster": "https://images.unsplash.com/photo-1532766324881-8b211bb1f2fc?auto=format&fit=crop&w=800&q=80",
+    "poster": "https://images.unsplash.com/photo-1517436073-3b1b110bc441?auto=format&fit=crop&w=800&q=80",
     "desc": "Coordinate stunning group routines for your next big celebration.",
     "song_count": "2-3 songs"
   }
@@ -53,16 +53,18 @@ AVAILABLE_PROGRAMS = [
 
 st.markdown('''
 <style>
+/* Cinematic Bollywood Theme */
 html, body, [class*="css"] {
     font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
 .stApp {
     background:
-        radial-gradient(circle at top left, rgba(255, 95, 162, .16), transparent 30%),
-        radial-gradient(circle at top right, rgba(85, 198, 255, .14), transparent 25%),
-        #07070f;
-    color: #f9fafb;
+        radial-gradient(circle at top left, rgba(255, 0, 127, .18), transparent 35%),
+        radial-gradient(circle at top right, rgba(255, 170, 0, .15), transparent 30%),
+        radial-gradient(circle at bottom, rgba(138, 43, 226, .12), transparent 45%),
+        #0a0510;
+    color: #fdfbf7;
 }
 
 .block-container {
@@ -89,26 +91,33 @@ button {
     font-size: 16px;
 }
 
+/* Primary Button Styling */
 button[kind="primary"] {
-    background: linear-gradient(90deg, #ffcf5f, #ff5fa2) !important;
-    color: #171204 !important;
+    background: linear-gradient(90deg, #ff007f, #ffaa00) !important;
+    color: #ffffff !important;
     border: none !important;
+    box-shadow: 0 4px 15px rgba(255, 0, 127, 0.3);
 }
 
-#MainMenu {
-    visibility: hidden;
+/* Specific styling applied to Apple Pay checkout button state */
+div[data-testid="stVerticalBlock"] div:has(button):nth-child(2) button[kind="primary"].apple-pay-active {
+    background: #000000 !important;
+    color: #ffffff !important;
+    border: 1px solid #333333 !important;
+    border-radius: 12px !important;
+    font-size: 20px !important;
+    box-shadow: none !important;
 }
 
-footer {
-    visibility: hidden;
-}
+#MainMenu { visibility: hidden; }
+footer { visibility: hidden; }
 
 .bf-hero {
     border-radius: 28px;
     padding: 32px 20px;
     border: 1px solid rgba(255, 255, 255, .12);
     background:
-        linear-gradient(135deg, rgba(255, 95, 162, .18), rgba(85, 198, 255, .12), rgba(255, 207, 95, .14));
+        linear-gradient(135deg, rgba(255, 0, 127, .2), rgba(255, 170, 0, .15), rgba(138, 43, 226, .15));
     text-align: center;
     margin-bottom: 18px;
 }
@@ -132,33 +141,29 @@ footer {
 }
 
 .bf-gradient {
-    background: linear-gradient(90deg, #ffcf5f, #ff5fa2, #55c6ff);
+    background: linear-gradient(90deg, #ffaa00, #ff007f, #8a2be2);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
     color: transparent;
 }
 
-.bf-muted {
-    color: rgba(249, 250, 251, .68);
-}
-
-.bf-section-title h2 {
-    margin-bottom: 4px;
-}
+.bf-muted { color: rgba(253, 251, 247, .7); }
+.bf-section-title h2 { margin-bottom: 4px; }
 
 .bf-card {
     border-radius: 24px;
     overflow: hidden;
-    border: 1px solid rgba(255, 255, 255, .12);
+    border: 1px solid rgba(255, 255, 255, .15);
     background: rgba(255, 255, 255, .05);
     margin-bottom: 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.4);
 }
 
 .bf-media {
     position: relative;
     aspect-ratio: 16 / 10;
-    background: linear-gradient(135deg, rgba(255, 95, 162, .35), rgba(85, 198, 255, .28));
+    background: linear-gradient(135deg, rgba(255, 0, 127, .35), rgba(255, 170, 0, .28));
 }
 
 .bf-media img {
@@ -171,7 +176,7 @@ footer {
 .bf-overlay {
     position: absolute;
     inset: 0;
-    background: linear-gradient(to top, rgba(3, 7, 18, .65), transparent 45%);
+    background: linear-gradient(to top, rgba(10, 5, 16, .85), transparent 60%);
 }
 
 .bf-badge {
@@ -180,8 +185,8 @@ footer {
     left: 12px;
     padding: 7px 10px;
     border-radius: 999px;
-    background: rgba(0, 0, 0, .35);
-    border: 1px solid rgba(255, 255, 255, .15);
+    background: rgba(0, 0, 0, .45);
+    border: 1px solid rgba(255, 255, 255, .25);
     font-size: 12px;
     font-weight: 800;
     color: white;
@@ -192,38 +197,26 @@ footer {
     bottom: 12px;
     left: auto;
     right: 12px;
-    background: rgba(255, 207, 95, .18);
+    background: rgba(255, 170, 0, .25);
 }
 
-.bf-body {
-    padding: 16px;
-}
+.bf-body { padding: 16px; }
+.bf-body h3 { margin: 0 0 10px; font-size: 1.05rem; }
 
-.bf-body h3 {
-    margin: 0 0 10px;
-    font-size: 1.05rem;
-}
-
-.bf-chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-bottom: 10px;
-}
-
+.bf-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
 .bf-chip {
     padding: 7px 9px;
     border-radius: 999px;
     background: rgba(255, 255, 255, .08);
     border: 1px solid rgba(255, 255, 255, .08);
     font-size: 12px;
-    color: rgba(249, 250, 251, .72);
+    color: rgba(253, 251, 247, .75);
 }
 
 .bf-price {
     font-size: 1.25rem;
     font-weight: 900;
-    color: #43e97b;
+    color: #00e676;
     margin-top: 8px;
 }
 
@@ -237,36 +230,22 @@ footer {
     margin-bottom: 18px;
 }
 
-.bf-summary div {
-    display: flex;
-    justify-content: space-between;
-    gap: 12px;
-}
+.bf-summary div { display: flex; justify-content: space-between; gap: 12px; }
 
 .bf-id {
     text-align: center;
     padding: 20px;
     border-radius: 24px;
     background:
-        linear-gradient(135deg, rgba(255, 207, 95, .12), rgba(255, 95, 162, .12), rgba(85, 198, 255, .12));
-    border: 1px solid rgba(255, 255, 255, .12);
+        linear-gradient(135deg, rgba(255, 170, 0, .15), rgba(255, 0, 127, .15), rgba(138, 43, 226, .15));
+    border: 1px solid rgba(255, 255, 255, .15);
     margin-bottom: 16px;
 }
 
 @media (max-width: 700px) {
-    div[data-baseweb="row"] {
-        flex-direction: column !important;
-    }
-
-    div[data-baseweb="col"] {
-        width: 100% !important;
-        min-width: 100% !important;
-    }
-
-    .block-container {
-        padding-left: 12px;
-        padding-right: 12px;
-    }
+    div[data-baseweb="row"] { flex-direction: column !important; }
+    div[data-baseweb="col"] { width: 100% !important; min-width: 100% !important; }
+    .block-container { padding-left: 12px; padding-right: 12px; }
 }
 </style>
 ''', unsafe_allow_html=True)
@@ -276,11 +255,7 @@ if "app_state" not in st.session_state:
 
 if "current_user" not in st.session_state:
     st.session_state.current_user = {
-        "Name": "",
-        "Email": "",
-        "Program Number": "",
-        "Class": "",
-        "Fee": 0.0
+        "Name": "", "Email": "", "Program Number": "", "Class": "", "Fee": 0.0
     }
 
 if "student_db" not in st.session_state:
@@ -290,14 +265,9 @@ if "student_db" not in st.session_state:
 def navigate(to_state):
     st.session_state.app_state = to_state
 
-
 def reset_user():
     st.session_state.current_user = {
-        "Name": "",
-        "Email": "",
-        "Program Number": "",
-        "Class": "",
-        "Fee": 0.0
+        "Name": "", "Email": "", "Program Number": "", "Class": "", "Fee": 0.0
     }
     st.session_state.app_state = "home"
 
@@ -317,23 +287,10 @@ if st.session_state.app_state == "home":
     st.write("")
 
     col1, col2 = st.columns(2)
-
     with col1:
-        st.button(
-            "Register & Enroll",
-            use_container_width=True,
-            type="primary",
-            on_click=navigate,
-            args=("register",)
-        )
-
+        st.button("Register & Enroll", use_container_width=True, type="primary", on_click=navigate, args=("register",))
     with col2:
-        st.button(
-            "Admin Portal",
-            use_container_width=True,
-            on_click=navigate,
-            args=("admin_login",)
-        )
+        st.button("Admin Portal", use_container_width=True, on_click=navigate, args=("admin_login",))
 
 
 elif st.session_state.app_state == "register":
@@ -343,45 +300,18 @@ elif st.session_state.app_state == "register":
         unsafe_allow_html=True
     )
 
-    st.session_state.current_user["Name"] = st.text_input(
-        "Full Name",
-        value=st.session_state.current_user.get("Name", ""),
-        placeholder="Jane Doe"
-    )
-
-    st.session_state.current_user["Email"] = st.text_input(
-        "Email",
-        value=st.session_state.current_user.get("Email", ""),
-        placeholder="jane@example.com"
-    )
+    st.session_state.current_user["Name"] = st.text_input("Full Name", value=st.session_state.current_user.get("Name", ""), placeholder="Jane Doe")
+    st.session_state.current_user["Email"] = st.text_input("Email", value=st.session_state.current_user.get("Email", ""), placeholder="jane@example.com")
 
     st.write("")
 
-    valid = (
-        st.session_state.current_user["Name"].strip() != ""
-        and "@" in st.session_state.current_user["Email"]
-        and "." in st.session_state.current_user["Email"]
-    )
+    valid = (st.session_state.current_user["Name"].strip() != "" and "@" in st.session_state.current_user["Email"] and "." in st.session_state.current_user["Email"])
 
     col1, col2 = st.columns(2)
-
     with col1:
-        st.button(
-            "Back",
-            use_container_width=True,
-            on_click=navigate,
-            args=("home",)
-        )
-
+        st.button("Back", use_container_width=True, on_click=navigate, args=("home",))
     with col2:
-        st.button(
-            "Continue",
-            use_container_width=True,
-            type="primary",
-            disabled=not valid,
-            on_click=navigate,
-            args=("classes",)
-        )
+        st.button("Continue", use_container_width=True, type="primary", disabled=not valid, on_click=navigate, args=("classes",))
 
 
 elif st.session_state.app_state == "classes":
@@ -395,7 +325,6 @@ elif st.session_state.app_state == "classes":
         st.info("No programs are currently available.")
     else:
         cols = st.columns(2)
-
         for idx, prog in enumerate(AVAILABLE_PROGRAMS):
             with cols[idx % 2]:
                 st.markdown(f'''
@@ -419,28 +348,32 @@ elif st.session_state.app_state == "classes":
                 </div>
                 ''', unsafe_allow_html=True)
 
-                if st.button(
-                    f"Select {prog['name']}",
-                    key=f"select_{prog['id']}",
-                    use_container_width=True,
-                    type="primary"
-                ):
+                if st.button(f"Select {prog['name']}", key=f"select_{prog['id']}", use_container_width=True, type="primary"):
                     st.session_state.current_user["Class"] = prog["name"]
                     st.session_state.current_user["Program Number"] = prog["id"]
                     st.session_state.current_user["Fee"] = prog["fee"]
                     navigate("checkout")
 
     st.write("")
-
-    st.button(
-        "Back",
-        use_container_width=True,
-        on_click=navigate,
-        args=("register",)
-    )
+    st.button("Back", use_container_width=True, on_click=navigate, args=("register",))
 
 
 elif st.session_state.app_state == "checkout":
+    
+    # Injecting specific CSS to style the primary button exactly like an Apple Pay button on this screen
+    st.markdown('''
+    <style>
+    div[data-testid="stButton"] button[kind="primary"] {
+        background: #000000 !important;
+        color: #ffffff !important;
+        border-radius: 8px !important;
+        font-size: 22px !important;
+        box-shadow: none !important;
+        border: 1px solid #333 !important;
+    }
+    </style>
+    ''', unsafe_allow_html=True)
+    
     st.markdown(
         '<div class="bf-section-title"><h2>Secure Checkout</h2>'
         '<p class="bf-muted">Review your program and accept all legal terms.</p></div>',
@@ -470,34 +403,19 @@ elif st.session_state.app_state == "checkout":
     st.markdown("### Legal Agreements")
 
     cb1 = st.checkbox("I agree to the Physical Activity & Liability Waiver")
-    st.caption(
-        "I acknowledge that dance involves physical exertion and risk of injury. "
-        "I assume all risks and release BollyFusion Academy from liability."
-    )
+    st.caption("I acknowledge that dance involves physical exertion and risk of injury. I assume all risks and release BollyFusion Academy from liability.")
 
     cb2 = st.checkbox("I agree to the Media & Photography Release")
-    st.caption(
-        "I grant BollyFusion Academy permission to use photographs and video recordings of me "
-        "for studio-related promotional purposes."
-    )
+    st.caption("I grant BollyFusion Academy permission to use photographs and video recordings of me for studio-related promotional purposes.")
 
     cb3 = st.checkbox("I agree to the Refund Policy")
-    st.caption(
-        "A free refund is available after 2 weeks of program commencement. "
-        "No refunds or prorations outside this window."
-    )
+    st.caption("A free refund is available after 2 weeks of program commencement. No refunds or prorations outside this window.")
 
     st.write("")
 
     col1, col2 = st.columns(2)
-
     with col1:
-        st.button(
-            "Back",
-            use_container_width=True,
-            on_click=navigate,
-            args=("classes",)
-        )
+        st.button("Back", use_container_width=True, on_click=navigate, args=("classes",))
 
     with col2:
         can_pay = cb1 and cb2 and cb3
@@ -508,12 +426,13 @@ elif st.session_state.app_state == "checkout":
                 "Email": st.session_state.current_user.get("Email", ""),
                 "Program Number": st.session_state.current_user.get("Program Number", ""),
                 "Class": st.session_state.current_user.get("Class", ""),
-                "Status": "Paid"
+                "Status": "Paid (Apple Pay / Stripe)"
             })
             st.session_state.app_state = "success"
 
+        # This primary button is hijacked by our CSS above to render as an Apple Pay button.
         st.button(
-            "Pay Securely",
+            " Pay",
             use_container_width=True,
             type="primary",
             disabled=not can_pay,
@@ -546,12 +465,7 @@ elif st.session_state.app_state == "success":
 
     st.write("")
 
-    st.button(
-        "Done (Back to Home)",
-        use_container_width=True,
-        type="primary",
-        on_click=reset_user
-    )
+    st.button("Done (Back to Home)", use_container_width=True, type="primary", on_click=reset_user)
 
 
 elif st.session_state.app_state == "admin_login":
@@ -567,21 +481,10 @@ elif st.session_state.app_state == "admin_login":
     st.write("")
 
     col1, col2 = st.columns(2)
-
     with col1:
-        st.button(
-            "Cancel",
-            use_container_width=True,
-            on_click=navigate,
-            args=("home",)
-        )
-
+        st.button("Cancel", use_container_width=True, on_click=navigate, args=("home",))
     with col2:
-        if st.button(
-            "Login",
-            use_container_width=True,
-            type="primary"
-        ):
+        if st.button("Login", use_container_width=True, type="primary"):
             if a_user == "admin" and a_pass == "admin123":
                 navigate("admin_dashboard")
             else:
@@ -602,21 +505,9 @@ elif st.session_state.app_state == "admin_dashboard":
 
         csv = df.to_csv(index=False).encode("utf-8")
 
-        st.download_button(
-            "Download CSV",
-            data=csv,
-            file_name="bollyfusion-registrations.csv",
-            mime="text/csv",
-            key="download_roster_csv"
-        )
+        st.download_button("Download CSV", data=csv, file_name="bollyfusion-registrations.csv", mime="text/csv", key="download_roster_csv")
     else:
         st.info("No students have registered yet during this session.")
 
     st.write("")
-
-    st.button(
-        "Logout",
-        use_container_width=True,
-        on_click=navigate,
-        args=("home",)
-    )
+    st.button("Logout", use_container_width=True, on_click=navigate, args=("home",))
