@@ -316,6 +316,7 @@ elif st.session_state.app_state == "register":
 
 elif st.session_state.app_state == "classes":
     st.markdown(
+
         unsafe_allow_html=True
     )
 
