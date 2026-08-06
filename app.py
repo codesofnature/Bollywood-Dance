@@ -1,381 +1,4 @@
 import streamlit as st
-import pandas as pd
-import matplotlib.pyplot as plt
-import numpy as np
-import math
-import plotly.graph_objects as go
-import plotly.express as px
-import datetime
-import json
-
-# --- Configuration ---
-st.set_page_config(page_title="BollyFusion Academy Dashboard", layout="wide")
-
-st.title("BollyFusion Academy Financial Dashboard")
-st.markdown("This model projects annual revenue, calculates Cost of Goods Sold (COGS), and generates an automated class timetable. **Toggle the 'Offer this program?' checkbox in each level to dynamically generate the public-facing student app code.**")
-
-# --- Sidebar Inputs ---
-st.sidebar.header("1. Studio Logistics")
-hourly_rate = st.sidebar.number_input("Studio Rental Cost ($/hr)", min_value=0.0, value=20.0, step=5.0)
-max_class_size = st.sidebar.number_input("Max Students per Class", min_value=5, value=20, step=1)
-
-st.sidebar.divider()
-
-st.sidebar.header("2. Program Enrollment & Economics")
-st.sidebar.markdown("Specify students, program fees, duration, and event metrics per level.")
-
-# Category 1
-with st.sidebar.expander("**Category 1 (Bolly Cardio 1)**", expanded=False):
-    offered_1 = st.checkbox("Offer this program?", value=True, key="off1")
-    name_1 = st.text_input("Category Name", value="Bolly Cardio 1", key='n1')
-    hrs_1 = st.number_input("Hours/Week", min_value=0.0, value=0.5, step=0.5, key='h1')
-    weeks_1 = st.number_input("Program Weeks", min_value=1, value=20, step=1, key='wk1')
-    st_sparks = st.number_input("Students", min_value=0, value=80, step=1, key='s1')
-    term_sparks = st.number_input("Program Fee ($)", min_value=0.0, value=250.0, step=50.0, key='t1')
-    ev_sparks = st.number_input("Events/Yr", min_value=0, value=0, step=1, key='e1')
-    fee_sparks = st.number_input("Event Fee Charged/Student ($)", min_value=0.0, value=85.0, step=5.0, key='f1')
-    vcogs_sparks = st.number_input("Event Cost/Student ($)", min_value=0.0, value=40.0, step=5.0, key='vc1')
-    fcogs_sparks = st.number_input("Fixed Cost/Event ($)", min_value=0.0, value=250.0, step=50.0, key='fc1')
-
-# Category 2
-with st.sidebar.expander("**Category 2 (Bolly Cardio II)**", expanded=False):
-    offered_2 = st.checkbox("Offer this program?", value=True, key="off2")
-    name_2 = st.text_input("Category Name", value="Bolly Cardio II", key='n2')
-    hrs_2 = st.number_input("Hours/Week", min_value=0.0, value=1.0, step=0.5, key='h2')
-    weeks_2 = st.number_input("Program Weeks", min_value=1, value=20, step=1, key='wk2')
-    st_roots = st.number_input("Students", min_value=0, value=50, step=1, key='s2')
-    term_roots = st.number_input("Program Fee ($)", min_value=0.0, value=500.0, step=50.0, key='t2')
-    ev_roots = st.number_input("Events/Yr", min_value=0, value=0, step=1, key='e2')
-    fee_roots = st.number_input("Event Fee Charged/Student ($)", min_value=0.0, value=85.0, step=5.0, key='f2')
-    vcogs_roots = st.number_input("Event Cost/Student ($)", min_value=0.0, value=40.0, step=5.0, key='vc2')
-    fcogs_roots = st.number_input("Fixed Cost/Event ($)", min_value=0.0, value=250.0, step=50.0, key='fc2')
-
-# Category 3
-with st.sidebar.expander("**Category 3 (Couples to Event)**", expanded=False):
-    offered_3 = st.checkbox("Offer this program?", value=True, key="off3")
-    name_3 = st.text_input("Category Name", value="Couples to Event", key='n3')
-    hrs_3 = st.number_input("Hours/Week", min_value=0.0, value=1.0, step=0.5, key='h3')
-    weeks_3 = st.number_input("Program Weeks", min_value=1, value=10, step=1, key='wk3')
-    st_stars = st.number_input("Students", min_value=0, value=4, step=1, key='s3')
-    term_stars = st.number_input("Program Fee ($)", min_value=0.0, value=1500.0, step=50.0, key='t3')
-    ev_stars = st.number_input("Events/Yr", min_value=0, value=0, step=1, key='e3')
-    fee_stars = st.number_input("Event Fee Charged/Student ($)", min_value=0.0, value=100.0, step=5.0, key='f3')
-    vcogs_stars = st.number_input("Event Cost/Student ($)", min_value=0.0, value=50.0, step=5.0, key='vc3')
-    fcogs_stars = st.number_input("Fixed Cost/Event ($)", min_value=0.0, value=300.0, step=50.0, key='fc3')
-
-# Category 4
-with st.sidebar.expander("**Category 4 (Group to Events)**", expanded=False):
-    offered_4 = st.checkbox("Offer this program?", value=True, key="off4")
-    name_4 = st.text_input("Category Name", value="Group to Events", key='n4')
-    hrs_4 = st.number_input("Hours/Week", min_value=0.0, value=1.0, step=0.5, key='h4')
-    weeks_4 = st.number_input("Program Weeks", min_value=1, value=10, step=1, key='wk4')
-    st_beats = st.number_input("Students", min_value=0, value=4, step=1, key='s4')
-    term_beats = st.number_input("Program Fee ($)", min_value=0.0, value=1000.0, step=50.0, key='t4')
-    ev_beats = st.number_input("Events/Yr", min_value=0, value=0, step=1, key='e4')
-    fee_beats = st.number_input("Event Fee Charged/Student ($)", min_value=0.0, value=50.0, step=5.0, key='f4')
-    vcogs_beats = st.number_input("Event Cost/Student ($)", min_value=0.0, value=20.0, step=5.0, key='vc4')
-    fcogs_beats = st.number_input("Fixed Cost/Event ($)", min_value=0.0, value=150.0, step=50.0, key='fc4')
-
-# Category 5
-with st.sidebar.expander("**Category 5 (Elite Fusion Troupe)**", expanded=False):
-    offered_5 = st.checkbox("Offer this program?", value=True, key="off5")
-    name_5 = st.text_input("Category Name", value="Elite Fusion Troupe", key='n5')
-    hrs_5 = st.number_input("Hours/Week", min_value=0.0, value=11.0, step=0.5, key='h5')
-    weeks_5 = st.number_input("Program Weeks", min_value=1, value=20, step=1, key='wk5')
-    st_elite = st.number_input("Students", min_value=0, value=0, step=1, key='s5')
-    term_elite = st.number_input("Program Fee ($)", min_value=0.0, value=2500.0, step=50.0, key='t5')
-    ev_elite = st.number_input("Events/Yr", min_value=0, value=0, step=1, key='e5')
-    fee_elite = st.number_input("Event Fee Charged/Student ($)", min_value=0.0, value=150.0, step=5.0, key='f5')
-    vcogs_elite = st.number_input("Event Cost/Student ($)", min_value=0.0, value=75.0, step=5.0, key='vc5')
-    fcogs_elite = st.number_input("Fixed Cost/Event ($)", min_value=0.0, value=500.0, step=50.0, key='fc5')
-
-# Category 6
-with st.sidebar.expander("**Category 6 (Premier Company)**", expanded=False):
-    offered_6 = st.checkbox("Offer this program?", value=True, key="off6")
-    name_6 = st.text_input("Category Name", value="Premier Company", key='n6')
-    hrs_6 = st.number_input("Hours/Week", min_value=0.0, value=13.0, step=0.5, key='h6')
-    weeks_6 = st.number_input("Program Weeks", min_value=1, value=20, step=1, key='wk6')
-    st_premier = st.number_input("Students", min_value=0, value=0, step=1, key='s6')
-    term_premier = st.number_input("Program Fee ($)", min_value=0.0, value=3000.0, step=50.0, key='t6')
-    ev_premier = st.number_input("Events/Yr", min_value=0, value=0, step=1, key='e6')
-    fee_premier = st.number_input("Event Fee Charged/Student ($)", min_value=0.0, value=150.0, step=5.0, key='f6')
-    vcogs_premier = st.number_input("Event Cost/Student ($)", min_value=0.0, value=75.0, step=5.0, key='vc6')
-    fcogs_premier = st.number_input("Fixed Cost/Event ($)", min_value=0.0, value=500.0, step=50.0, key='fc6')
-
-st.sidebar.divider()
-
-# --- Insurance Costs ---
-st.sidebar.header("3. Insurance Costs")
-st.sidebar.markdown("Set liability/insurance costs per student and per studio hour.")
-ins_per_student = st.sidebar.number_input("Cost per Student ($/yr)", min_value=0.0, value=15.0, step=5.0)
-ins_per_hour = st.sidebar.number_input("Cost per Studio Hour ($/hr)", min_value=0.0, value=1.0, step=0.5)
-
-st.sidebar.divider()
-
-# --- Music Rights Costs ---
-st.sidebar.header("4. Music Licensing & Rights")
-st.sidebar.markdown("Set music performance rights costs per studio teaching hour.")
-music_per_hour = st.sidebar.number_input("Music Rights Cost ($/hr)", min_value=0.0, value=0.50, step=0.10)
-
-# --- Data Logic ---
-programs = [name_1, name_2, name_3, name_4, name_5, name_6]
-program_weeks = [weeks_1, weeks_2, weeks_3, weeks_4, weeks_5, weeks_6]
-base_weekly_hours = [hrs_1, hrs_2, hrs_3, hrs_4, hrs_5, hrs_6]
-
-students = [
-    st_sparks if offered_1 else 0, 
-    st_roots if offered_2 else 0, 
-    st_stars if offered_3 else 0, 
-    st_beats if offered_4 else 0, 
-    st_elite if offered_5 else 0, 
-    st_premier if offered_6 else 0
-]
-
-term_fees = [term_sparks, term_roots, term_stars, term_beats, term_elite, term_premier]
-events = [ev_sparks, ev_roots, ev_stars, ev_beats, ev_elite, ev_premier]
-event_fees = [fee_sparks, fee_roots, fee_stars, fee_beats, fee_elite, fee_premier]
-event_v_cogs = [vcogs_sparks, vcogs_roots, vcogs_stars, vcogs_beats, vcogs_elite, vcogs_premier]
-event_f_cogs = [fcogs_sparks, fcogs_roots, fcogs_stars, fcogs_beats, fcogs_elite, fcogs_premier]
-
-posters = [
-    "https://images.unsplash.com/photo-1548690312-e3b507d8c110?auto=format&fit=crop&w=800&q=80", 
-    "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=800&q=80", 
-    "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80", 
-    "https://images.unsplash.com/photo-1532766324881-8b211bb1f2fc?auto=format&fit=crop&w=800&q=80", 
-    "https://images.unsplash.com/photo-1547153760-18fc86324498?auto=format&fit=crop&w=800&q=80", 
-    "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?auto=format&fit=crop&w=800&q=80"  
-]
-
-descriptions = [
-    "High-energy entry-level fitness infused with cinematic Bollywood flair.",
-    "Level up your stamina with complex beats and faster choreography.",
-    "Perfect for weddings! Master partner choreography with elegance and grace.",
-    "Coordinate stunning group routines for your next big celebration.",
-    "Advanced fusion techniques for aspiring competitive performers.",
-    "Our flagship professional company. Stage-ready cinematic perfection."
-]
-
-offered_flags = [offered_1, offered_2, offered_3, offered_4, offered_5, offered_6]
-generated_programs = []
-
-for i in range(len(programs)):
-    if offered_flags[i]:
-        generated_programs.append({
-            "name": programs[i],
-            "prog_num": str(i + 1),
-            "hours": base_weekly_hours[i],
-            "weeks": program_weeks[i],
-            "fee": term_fees[i],
-            "poster": posters[i],
-            "desc": descriptions[i],
-            "song_count": "4-5" if program_weeks[i] >= 20 else "2-3"
-        })
-
-# --- Financial Calculations ---
-sections_needed = [math.ceil(s / max_class_size) if s > 0 else 0 for s in students]
-annual_hours = [sec * hrs * 52 for sec, hrs in zip(sections_needed, base_weekly_hours)]
-tuition_revenue = [s * rate * (52 / wks) if wks > 0 else 0 for s, rate, wks in zip(students, term_fees, program_weeks)]
-event_revenue = [s * e * fee for s, e, fee in zip(students, events, event_fees)]
-total_gross_revenue = [t + e for t, e in zip(tuition_revenue, event_revenue)]
-cogs_studio = [hours * hourly_rate for hours in annual_hours]
-cogs_events = [(s * e * v_cogs) + (e * f_cogs if s > 0 else 0) for s, e, v_cogs, f_cogs in zip(students, events, event_v_cogs, event_f_cogs)]
-cogs_insurance = [(s * ins_per_student) + (hours * ins_per_hour) for s, hours in zip(students, annual_hours)]
-cogs_music = [hours * music_per_hour for hours in annual_hours]
-total_cogs = [s_cogs + e_cogs + i_cogs + m_cogs for s_cogs, e_cogs, i_cogs, m_cogs in zip(cogs_studio, cogs_events, cogs_insurance, cogs_music)]
-gross_profit = [rev - cost for rev, cost in zip(total_gross_revenue, total_cogs)]
-
-g_students = sum(students)
-g_revenue = sum(total_gross_revenue)
-g_cogs = sum(total_cogs)
-g_profit = sum(gross_profit)
-
-df = pd.DataFrame({
-    "Program Level": programs,
-    "Offered": ["Yes" if flag else "No" for flag in offered_flags],
-    "Enrolled": students,
-    "Hours/Week": base_weekly_hours,
-    "Program Weeks": program_weeks,
-    "Cycles/Year": [f"{52/wks:.1f}" if wks > 0 else "0.0" for wks in program_weeks],
-    "Fee per Cycle": [f"${fee:,.2f}" for fee in term_fees],
-    "Gross Revenue": [f"${rev:,.2f}" for rev in total_gross_revenue],
-    "Studio COGS": [f"${cost:,.2f}" for cost in cogs_studio],
-    "Event COGS": [f"${cost:,.2f}" for cost in cogs_events],
-    "Total COGS": [f"${cost:,.2f}" for cost in total_cogs],
-    "Gross Profit": [f"${profit:,.2f}" for profit in gross_profit]
-})
-
-# --- Dashboard Layout ---
-col_met1, col_met2, col_met3, col_met4 = st.columns(4)
-col_met1.metric(label="Total Enrolled", value=g_students)
-col_met2.metric(label="Total Gross Revenue", value=f"${g_revenue:,.0f}")
-col_met3.metric(label="Total COGS", value=f"${g_cogs:,.0f}")
-col_met4.metric(label="Total Gross Profit", value=f"${g_profit:,.0f}", delta=f"{(g_profit/g_revenue)*100:.1f}% Margin" if g_revenue > 0 else "0%")
-
-st.divider()
-
-if g_students > 0:
-    col1, col2 = st.columns([1, 1.5])
-    with col1:
-        st.subheader("Revenue Breakdown (COGS vs. Profit)")
-        labels = ["Total Gross Revenue"]
-        parents = [""]
-        values = [sum(total_gross_revenue)]
-        node_colors = ["#e2e8f0"]
-        for i, p in enumerate(programs):
-            rev = total_gross_revenue[i]
-            prof = gross_profit[i]
-            c_total = total_cogs[i]
-            if rev > 0:
-                labels.append(p)
-                parents.append("Total Gross Revenue")
-                values.append(rev)
-                node_colors.append("#3b82f6")
-                v_prof = prof if prof > 0 else 0
-                v_cogs = rev - v_prof
-                if v_prof > 0:
-                    labels.append(f"Profit<br>({p})")
-                    parents.append(p)
-                    values.append(v_prof)
-                    node_colors.append("#00e676")
-                if v_cogs > 0:
-                    cogs_label = f"COGS<br>({p})"
-                    labels.append(cogs_label)
-                    parents.append(p)
-                    values.append(v_cogs)
-                    node_colors.append("#ff0000")
-        if sum(total_gross_revenue) > 0:
-            fig1 = go.Figure(go.Sunburst(
-                labels=labels, parents=parents, values=values,
-                branchvalues="total", texttemplate="%{label}<br>$%{value:,.0f}", 
-                marker=dict(colors=node_colors)
-            ))
-            fig1.update_layout(margin=dict(t=10, l=0, r=0, b=0))
-            st.plotly_chart(fig1, use_container_width=True)
-
-    with col2:
-        st.subheader("Revenue vs. COGS vs. Gross Profit")
-        fig2, ax2 = plt.subplots(figsize=(10, 6))
-        x = np.arange(len(programs))
-        width = 0.25
-        ax2.bar(x - width, total_gross_revenue, width, label='Total Gross Revenue', color='#2ca02c', edgecolor='black')
-        ax2.bar(x, total_cogs, width, label='Total COGS', color='#d62728', edgecolor='black')
-        ax2.bar(x + width, gross_profit, width, label='Gross Profit', color='#1f77b4', edgecolor='black')
-        ax2.set_ylabel('USD ($)')
-        ax2.set_xticks(x)
-        chart_labels = [p.replace(" ", "\n") for p in programs]
-        ax2.set_xticklabels(chart_labels, rotation=0, fontsize=9)
-        ax2.legend()
-        plt.tight_layout()
-        st.pyplot(fig2)
-
-st.divider()
-
-# --- Data Table ---
-st.subheader("Detailed Financial Breakdown by Program Level")
-st.dataframe(df, use_container_width=True)
-
-st.divider()
-
-# --- Tabs: Timetable, Roadmap, Website Generator ---
-tab1, tab2, tab3 = st.tabs(["Staggered Weekly Class Timetable", "60-Week High-Level Roadmap", "💻 Generate Student Site Code"])
-
-with tab1:
-    st.markdown("Auto-scheduler distributing classes across the week based on capacity logic. (Only generates slots for programs with > 0 enrolled students).")
-    daily_capacity = {d: {'start': 16.0, 'end': 21.0, 'current': 16.0} for d in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']}
-    daily_capacity.update({d: {'start': 9.0, 'end': 15.0, 'current': 9.0} for d in ['Saturday', 'Sunday']})
-    days_of_week = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
-    dummy_date = datetime.date(2026, 1, 1)
-    
-    def float_to_time(h):
-        hours, minutes = int(h), int(round((h - int(h)) * 60))
-        if minutes == 60: hours, minutes = hours + 1, 0
-        return datetime.time(hours, minutes)
-
-    schedule_data = []
-    for i, program in enumerate(programs):
-        if students[i] > 0 and offered_flags[i]:
-            for sec in range(sections_needed[i]):
-                hours_to_schedule = base_weekly_hours[i]
-                target_days = ['Saturday'] if i==0 else ['Sunday'] if i==1 else ['Monday', 'Wednesday', 'Friday', 'Tuesday', 'Thursday'] if i==2 else days_of_week
-                max_chunk = 1.0 if i in [0,2] else 1.5 if i==1 else 2.5
-                
-                for day in target_days:
-                    if hours_to_schedule <= 0: break
-                    available_hours = daily_capacity[day]['end'] - daily_capacity[day]['current']
-                    if available_hours > 0:
-                        chunk = min(hours_to_schedule, available_hours, max_chunk)
-                        start_time = float_to_time(daily_capacity[day]['current'])
-                        end_time = float_to_time(daily_capacity[day]['current'] + chunk)
-                        schedule_data.append({
-                            "Program": program, "Section": f"Sec {sec+1}", "Day": day,
-                            "Start Time": datetime.datetime.combine(dummy_date, start_time),
-                            "End Time": datetime.datetime.combine(dummy_date, end_time),
-                            "Display": f"{program} ({chunk}h)"
-                        })
-                        daily_capacity[day]['current'] += chunk
-                        hours_to_schedule -= chunk
-
-    if schedule_data:
-        df_week = pd.DataFrame(schedule_data)
-        base_colors = ['#ff4b4b', '#ffa421', '#ffc533', '#00d4b2', '#00a3e0', '#b9529f']
-        level_colors = {programs[idx]: base_colors[idx] for idx in range(len(programs))}
-        fig_week = px.timeline(
-            df_week, x_start="Start Time", x_end="End Time", y="Day", color="Program",
-            color_discrete_map=level_colors, text="Display", title="Weekly Studio Allocation"
-        )
-        fig_week.update_yaxes(categoryorder='array', categoryarray=days_of_week[::-1])
-        fig_week.update_layout(xaxis=dict(tickformat="%I:%M %p", title="Time of Day"))
-        st.plotly_chart(fig_week, use_container_width=True)
-    else:
-        st.info("No schedule generated. Add students to offered programs.")
-
-with tab2:
-    st.markdown("Timeline maps a macro 60-week sequence.")
-    start_date = datetime.date(2026, 9, 1)
-    macro_schedule = [
-        {"Phase": "Fall Registration", "Start": start_date - datetime.timedelta(days=30), "End": start_date, "Type": "Admin"},
-        {"Phase": "Term 1 (Fall/Winter)", "Start": start_date, "End": start_date + datetime.timedelta(weeks=20), "Type": "Classes"},
-        {"Phase": "Winter Showcase", "Start": start_date + datetime.timedelta(weeks=18), "End": start_date + datetime.timedelta(weeks=19), "Type": "Event"},
-        {"Phase": "Winter Break", "Start": start_date + datetime.timedelta(weeks=20), "End": start_date + datetime.timedelta(weeks=22), "Type": "Break"},
-        {"Phase": "Term 2 (Spring)", "Start": start_date + datetime.timedelta(weeks=22), "End": start_date + datetime.timedelta(weeks=42), "Type": "Classes"}
-    ]
-    df_macro = pd.DataFrame(macro_schedule)
-    fig_macro = px.timeline(df_macro, x_start="Start", x_end="End", y="Phase", color="Type", color_discrete_map={"Classes": "#3b82f6", "Event": "#ff0000", "Break": "#00e676", "Admin": "#ffa421"})
-    fig_macro.update_yaxes(autorange="reversed")
-    fig_macro.update_layout(xaxis_title="Date", yaxis_title="")
-    st.plotly_chart(fig_macro, use_container_width=True)
-
-with tab3:
-    st.markdown("### 💻 Export Student App for Streamlit Cloud")
-    st.markdown(
-        "Generates a Python Streamlit app for GitHub + Streamlit Community Cloud. "
-        "Download `student_app.py`, `requirements.txt`, and `config.toml`, then push them to GitHub."
-    )
-
-    try:
-        site_programs = []
-
-        for i in range(len(programs)):
-            if offered_flags[i]:
-                poster = str(posters[i]).strip().replace(" &", "&").replace("&amp;", "&")
-
-                site_programs.append({
-                    "id": str(i + 1),
-                    "name": str(programs[i]).strip(),
-                    "hours": float(base_weekly_hours[i]),
-                    "weeks": int(program_weeks[i]),
-                    "fee": float(term_fees[i]),
-                    "poster": poster,
-                    "desc": str(descriptions[i]).strip(),
-                    "song_count": "4-5 songs" if program_weeks[i] >= 20 else "2-3 songs",
-                })
-
-        if not site_programs:
-            st.warning("⚠️ No programs are currently marked as 'Offered'. Toggle at least one category.")
-        else:
-            programs_json = json.dumps(site_programs, indent=2).replace("</", "<\\/")
-
-            student_app_template = r"""import streamlit as st
 import urllib.parse
 import pandas as pd
 
@@ -385,7 +8,48 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-AVAILABLE_PROGRAMS = __PROGRAMS_JSON__
+AVAILABLE_PROGRAMS = [
+  {
+    "id": "1",
+    "name": "Bolly Cardio 1",
+    "hours": 0.5,
+    "weeks": 20,
+    "fee": 250.0,
+    "poster": "https://images.unsplash.com/photo-1548690312-e3b507d8c110?auto=format&fit=crop&w=800&q=80",
+    "desc": "High-energy entry-level fitness infused with cinematic Bollywood flair.",
+    "song_count": "4-5 songs"
+  },
+  {
+    "id": "2",
+    "name": "Bolly Cardio II",
+    "hours": 1.0,
+    "weeks": 20,
+    "fee": 500.0,
+    "poster": "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=800&q=80",
+    "desc": "Level up your stamina with complex beats and faster choreography.",
+    "song_count": "4-5 songs"
+  },
+  {
+    "id": "3",
+    "name": "Couples to Event",
+    "hours": 1.0,
+    "weeks": 10,
+    "fee": 1500.0,
+    "poster": "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80",
+    "desc": "Perfect for weddings! Master partner choreography with elegance and grace.",
+    "song_count": "2-3 songs"
+  },
+  {
+    "id": "4",
+    "name": "Group to Events",
+    "hours": 1.0,
+    "weeks": 10,
+    "fee": 1000.0,
+    "poster": "https://images.unsplash.com/photo-1532766324881-8b211bb1f2fc?auto=format&fit=crop&w=800&q=80",
+    "desc": "Coordinate stunning group routines for your next big celebration.",
+    "song_count": "2-3 songs"
+  }
+]
 
 st.markdown('''
 <style>
@@ -956,50 +620,3 @@ elif st.session_state.app_state == "admin_dashboard":
         on_click=navigate,
         args=("home",)
     )
-"""
-
-            student_app_code = student_app_template.replace("__PROGRAMS_JSON__", programs_json)
-
-            requirements_code = """streamlit>=1.36.0
-pandas>=2.0.0
-"""
-
-            config_code = """[theme]
-base="dark"
-primaryColor="#ffcf5f"
-backgroundColor="#07070f"
-secondaryBackgroundColor="#111827"
-textColor="#f9fafb"
-"""
-
-            st.success(f"✅ Generated Streamlit student app for {len(site_programs)} offered programs.")
-
-            st.download_button(
-                "⬇️ Download student_app.py",
-                data=student_app_code.encode("utf-8"),
-                file_name="student_app.py",
-                mime="text/x-python",
-                key="download_student_app"
-            )
-
-            st.download_button(
-                "⬇️ Download requirements.txt",
-                data=requirements_code.encode("utf-8"),
-                file_name="requirements.txt",
-                mime="text/plain",
-                key="download_requirements"
-            )
-
-            st.download_button(
-                "⬇️ Download config.toml",
-                data=config_code.encode("utf-8"),
-                file_name="config.toml",
-                mime="text/plain",
-                key="download_config_toml"
-            )
-
-            with st.expander("Show student_app.py code"):
-                st.code(student_app_code, language="python")
-
-    except Exception as e:
-        st.error(f"Generator error: {e}")
