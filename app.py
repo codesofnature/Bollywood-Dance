@@ -5,7 +5,6 @@ import re
 
 st.set_page_config(
     page_title="BollyFusion Academy",
-    page_title="BollyFusion Academy",
     layout="centered",
     initial_sidebar_state="collapsed"
 )
