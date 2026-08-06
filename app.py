@@ -316,8 +316,6 @@ elif st.session_state.app_state == "register":
 
 elif st.session_state.app_state == "classes":
     st.markdown(
-        '<div class="bf-section-title"><h2>Choose a Program</h2>'
-        '<p class="bf-muted">Tap a program to continue to secure checkout.</p></div>',
         unsafe_allow_html=True
     )
 
