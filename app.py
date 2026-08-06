@@ -292,10 +292,10 @@ if st.session_state.app_state == "home":
         st.button("Admin Portal", use_container_width=True, type="primary", on_click=navigate, args=("admin_login",))
 
 
-elif st.session_state.app_state == "classes":
+elif st.session_state.app_state == "register":
     st.markdown(
-        '<div class="bf-section-title"><h2>Choose a Program</h2>'
-        '<p class="bf-muted">Tap a program to continue to secure checkout.</p></div>',
+        '<div class="bf-section-title"><h2>Student Registration</h2>'
+        '<p class="bf-muted">Enter your details to browse available programs.</p></div>',
         unsafe_allow_html=True
     )
 
@@ -311,6 +311,14 @@ elif st.session_state.app_state == "classes":
         st.button("Back", use_container_width=True, on_click=navigate, args=("home",))
     with col2:
         st.button("Continue", use_container_width=True, type="primary", disabled=not valid, on_click=navigate, args=("classes",))
+
+
+elif st.session_state.app_state == "classes":
+    st.markdown(
+        '<div class="bf-section-title"><h2>Choose a Program</h2>'
+        '<p class="bf-muted">Tap a program to continue to secure checkout.</p></div>',
+        unsafe_allow_html=True
+    )
 
 
 elif st.session_state.app_state == "classes":
