@@ -55,14 +55,14 @@ AVAILABLE_PROGRAMS = [
   },
   {
     "id": "5",
-    "name": "Bolly Kids 7-17",
+    "name": "Elite Fusion Troupe",
     "hours": 1.0,
-    "weeks": 20,
+    "weeks": 10,
     "fee": 500.0,
     "stripe_link": "https://buy.stripe.com/test_elite_fusion_2500",
     "poster": "https://github.com/codesofnature/Bollywood-Dance/blob/main/5.jpg?raw=true",
     "desc": "Advanced fusion techniques for aspiring competitive performers.",
-    "song_count": "4-5 songs"
+    "song_count": "2-3 songs"
   }
 ]
 
@@ -126,7 +126,22 @@ button[kind="primary"][disabled] {
     box-shadow: none !important;
     cursor: not-allowed !important;
 }
+/* Secondary Button Styling (The 'Back' button) */
+button[kind="secondary"] {
+    background: rgba(255, 255, 255, 0.05) !important;
+    color: #fdfbf7 !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    box-shadow: none !important;
+    transition: all 0.2s ease !important;
+}
 
+button[kind="secondary"]:hover,
+button[kind="secondary"]:active,
+button[kind="secondary"]:focus {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border-color: rgba(255, 255, 255, 0.4) !important;
+    color: #ffffff !important;
+}
 #MainMenu { visibility: hidden; }
 footer { visibility: hidden; }
 
@@ -293,11 +308,10 @@ def reset_user():
 if st.session_state.app_state == "home":
     st.markdown('''
     <div class="bf-hero">
-        <div class="bf-pill">🎬 BollyFusion Academy</div>
-        <h1>Cinematic dance, <span class="bf-gradient">built for every stage</span></h1>
+        <div class="bf-pill">🎬 Bollywood Dance Studio</div>
+        <h1>Master Cinematic Dance on Any Stage, <span class="bf-gradient">built for every stage</span></h1>
         <p class="bf-muted">
-            Register, choose a program, accept waivers, and complete enrollment via Stripe.
-            Optimized for iPhone, Android, and desktop.
+            Choose, Register, Pay            
         </p>
     </div>
     ''', unsafe_allow_html=True)
