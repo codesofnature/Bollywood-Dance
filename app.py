@@ -337,7 +337,12 @@ elif st.session_state.app_state == "register":
 
     st.write("")
 
-    valid = (st.session_state.current_user["Name"].strip() != "" and "@" in st.session_state.current_user["Email"] and "." in st.session_state.current_user["Email"])
+    # --- NEW REGEX EMAIL VALIDATION ---
+    email_pattern = r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"
+    is_valid_email = bool(re.match(email_pattern, st.session_state.current_user["Email"]))
+    
+    valid = (st.session_state.current_user["Name"].strip() != "" and is_valid_email)
+    # ----------------------------------
 
     col1, col2 = st.columns(2)
     with col1:
@@ -385,6 +390,18 @@ elif st.session_state.app_state == "classes":
                     st.session_state.current_user["Program Number"] = prog["id"]
                     st.session_state.current_user["Fee"] = prog["fee"]
                     st.session_state.current_user["Stripe Link"] = prog["stripe_link"]
+                    
+                    # --- NEW LOGGING LOGIC ---
+                    # Logs the user to the admin database regardless of payment completion
+                    st.session_state.student_db.append({
+                        "Name": st.session_state.current_user.get("Name", "Unknown"),
+                        "Email": st.session_state.current_user.get("Email", "Unknown"),
+                        "Program Number": prog["id"],
+                        "Class": prog["name"],
+                        "Status": "Pending Payment"
+                    })
+                    # -------------------------
+
                     navigate("checkout")
 
     st.write("")
