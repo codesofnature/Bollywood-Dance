@@ -335,14 +335,15 @@ if st.session_state.app_state == "home":
 
     col1, col2 = st.columns(2)
     with col1:
-        st.button("Browse Program Options for Students", use_container_width=True, type="primary", on_click=navigate, args=("register",))
+        st.button("Browse Program Options", use_container_width=True, type="primary", on_click=navigate, args=("register",))
     with col2:
-        st.button("Instructor Portal", use_container_width=True, on_click=navigate, args=("admin_login",))
+        st.button("Admin Portal", use_container_width=True, on_click=navigate, args=("admin_login",))
 
 
 elif st.session_state.app_state == "register":
     st.markdown(
-        '<div class="bf-section-title"><h2>Enter basic details to browse program and cost options</h2>'
+        '<div class="bf-section-title"><h2>BROWSE PROGRAM OPTIONS AND PRICES</h2>'
+        '<p class="bf-muted">Enter your details to browse available programs.</p></div>',
         unsafe_allow_html=True
     )
 
@@ -422,7 +423,7 @@ elif st.session_state.app_state == "classes":
 
 elif st.session_state.app_state == "checkout":
     st.markdown(
-        '<div class="bf-section-title"><h2>Lock in your program and checkout</h2>'
+        '<div class="bf-section-title"><h2>Secure Checkout</h2>'
         '<p class="bf-muted">Review your program and accept all legal terms.</p></div>',
         unsafe_allow_html=True
     )
