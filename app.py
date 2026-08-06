@@ -15,6 +15,7 @@ AVAILABLE_PROGRAMS = [
     "hours": 0.5,
     "weeks": 20,
     "fee": 250.0,
+    "stripe_link": "https://buy.stripe.com/6oU00jgpm9IUfJLezI9R603",
     "poster": "https://github.com/codesofnature/Bollywood-Dance/blob/main/1.jpg?raw=true",
     "desc": "High-energy entry-level fitness infused with cinematic Bollywood flair.",
     "song_count": "4-5 songs"
@@ -25,6 +26,7 @@ AVAILABLE_PROGRAMS = [
     "hours": 1.0,
     "weeks": 20,
     "fee": 500.0,
+    "stripe_link": "https://buy.stripe.com/test_bolly_cardio_2_500",
     "poster": "https://github.com/codesofnature/Bollywood-Dance/blob/main/2.jpg?raw=true",
     "desc": "Level up your stamina with complex beats and faster choreography.",
     "song_count": "4-5 songs"
@@ -35,6 +37,7 @@ AVAILABLE_PROGRAMS = [
     "hours": 1.0,
     "weeks": 10,
     "fee": 1500.0,
+    "stripe_link": "https://buy.stripe.com/test_couples_event_1500",
     "poster": "https://github.com/codesofnature/Bollywood-Dance/blob/main/3.jpg?raw=true",
     "desc": "Perfect for weddings! Master partner choreography with elegance and grace.",
     "song_count": "2-3 songs"
@@ -45,6 +48,7 @@ AVAILABLE_PROGRAMS = [
     "hours": 1.0,
     "weeks": 10,
     "fee": 1000.0,
+    "stripe_link": "https://buy.stripe.com/test_group_event_1000",
     "poster": "https://github.com/codesofnature/Bollywood-Dance/blob/main/4.jpg?raw=true",
     "desc": "Coordinate stunning group routines for your next big celebration.",
     "song_count": "2-3 songs"
@@ -53,11 +57,12 @@ AVAILABLE_PROGRAMS = [
     "id": "5",
     "name": "Bolly Kids 7-17",
     "hours": 1.0,
-    "weeks": 10,
-    "fee": 350.0,
+    "weeks": 20,
+    "fee": 500.0,
+    "stripe_link": "https://buy.stripe.com/test_elite_fusion_2500",
     "poster": "https://github.com/codesofnature/Bollywood-Dance/blob/main/5.jpg?raw=true",
     "desc": "Advanced fusion techniques for aspiring competitive performers.",
-    "song_count": "2-3 songs"
+    "song_count": "4-5 songs"
   }
 ]
 
@@ -95,14 +100,17 @@ button {
     font-weight: 800 !important;
 }
 
-.stButton > button {
+.stButton > button, .stLinkButton > a {
     width: 100%;
     padding: 14px 18px;
     font-size: 16px;
+    text-align: center;
+    border-radius: 16px !important;
+    font-weight: 800 !important;
 }
 
 /* Primary Button Styling */
-button[kind="primary"] {
+button[kind="primary"], .stLinkButton > a[data-testid="stLinkButton"] {
     background: linear-gradient(90deg, #ff007f, #ffaa00) !important;
     color: #ffffff !important;
     border: none !important;
@@ -110,9 +118,6 @@ button[kind="primary"] {
     transition: opacity 0.15s ease !important;
 }
 
-/* Keep the same gradient while disabled (e.g. form not yet valid) instead of
-   falling back to Streamlit's default white/grey disabled button, which is
-   what causes the "white, then changes color" flash as the user fills the form. */
 button[kind="primary"]:disabled,
 button[kind="primary"][disabled] {
     background: linear-gradient(90deg, #ff007f, #ffaa00) !important;
@@ -120,16 +125,6 @@ button[kind="primary"][disabled] {
     opacity: 0.45 !important;
     box-shadow: none !important;
     cursor: not-allowed !important;
-}
-
-/* Specific styling applied to Apple Pay checkout button state */
-div[data-testid="stVerticalBlock"] div:has(button):nth-child(2) button[kind="primary"].apple-pay-active {
-    background: #000000 !important;
-    color: #ffffff !important;
-    border: 1px solid #333333 !important;
-    border-radius: 12px !important;
-    font-size: 20px !important;
-    box-shadow: none !important;
 }
 
 #MainMenu { visibility: hidden; }
@@ -278,7 +273,7 @@ if "app_state" not in st.session_state:
 
 if "current_user" not in st.session_state:
     st.session_state.current_user = {
-        "Name": "", "Email": "", "Program Number": "", "Class": "", "Fee": 0.0
+        "Name": "", "Email": "", "Program Number": "", "Class": "", "Fee": 0.0, "Stripe Link": ""
     }
 
 if "student_db" not in st.session_state:
@@ -290,7 +285,7 @@ def navigate(to_state):
 
 def reset_user():
     st.session_state.current_user = {
-        "Name": "", "Email": "", "Program Number": "", "Class": "", "Fee": 0.0
+        "Name": "", "Email": "", "Program Number": "", "Class": "", "Fee": 0.0, "Stripe Link": ""
     }
     st.session_state.app_state = "home"
 
@@ -301,7 +296,7 @@ if st.session_state.app_state == "home":
         <div class="bf-pill">🎬 BollyFusion Academy</div>
         <h1>Cinematic dance, <span class="bf-gradient">built for every stage</span></h1>
         <p class="bf-muted">
-            Register, choose a program, accept waivers, and receive a QR studio pass.
+            Register, choose a program, accept waivers, and complete enrollment via Stripe.
             Optimized for iPhone, Android, and desktop.
         </p>
     </div>
@@ -375,6 +370,7 @@ elif st.session_state.app_state == "classes":
                     st.session_state.current_user["Class"] = prog["name"]
                     st.session_state.current_user["Program Number"] = prog["id"]
                     st.session_state.current_user["Fee"] = prog["fee"]
+                    st.session_state.current_user["Stripe Link"] = prog["stripe_link"]
                     navigate("checkout")
 
     st.write("")
@@ -382,36 +378,6 @@ elif st.session_state.app_state == "classes":
 
 
 elif st.session_state.app_state == "checkout":
-    
-    # Injecting specific CSS to style the primary button exactly like an Apple Pay button on this screen
-    st.markdown('''
-    <style>
-    div[data-testid="stButton"] button[kind="primary"] {
-        background: #000000 !important;
-        color: #ffffff !important;
-        border-radius: 8px !important;
-        font-size: 22px !important;
-        box-shadow: none !important;
-        border: 1px solid #333 !important;
-    }
-
-    /* Keep the black Apple-Pay look while disabled (waivers not yet all
-       checked), instead of falling back to the default white disabled
-       button, which is what causes the "white, then turns black" flash. */
-    div[data-testid="stButton"] button[kind="primary"]:disabled,
-    div[data-testid="stButton"] button[kind="primary"][disabled] {
-        background: #000000 !important;
-        color: #ffffff !important;
-        border-radius: 8px !important;
-        font-size: 22px !important;
-        box-shadow: none !important;
-        border: 1px solid #333 !important;
-        opacity: 0.45 !important;
-        cursor: not-allowed !important;
-    }
-    </style>
-    ''', unsafe_allow_html=True)
-    
     st.markdown(
         '<div class="bf-section-title"><h2>Secure Checkout</h2>'
         '<p class="bf-muted">Review your program and accept all legal terms.</p></div>',
@@ -420,6 +386,7 @@ elif st.session_state.app_state == "checkout":
 
     selected_class = st.session_state.current_user.get("Class", "")
     selected_fee = st.session_state.current_user.get("Fee", 0)
+    stripe_link = st.session_state.current_user.get("Stripe Link", "#")
 
     st.markdown(f'''
     <div class="bf-summary">
@@ -458,24 +425,20 @@ elif st.session_state.app_state == "checkout":
     with col2:
         can_pay = cb1 and cb2 and cb3
 
-        def process_payment():
-            st.session_state.student_db.append({
-                "Name": st.session_state.current_user.get("Name", ""),
-                "Email": st.session_state.current_user.get("Email", ""),
-                "Program Number": st.session_state.current_user.get("Program Number", ""),
-                "Class": st.session_state.current_user.get("Class", ""),
-                "Status": "Paid (Apple Pay / Stripe)"
-            })
-            st.session_state.app_state = "success"
-
-        # This primary button is hijacked by our CSS above to render as an Apple Pay button.
-        st.button(
-            " Pay",
-            use_container_width=True,
-            type="primary",
-            disabled=not can_pay,
-            on_click=process_payment
-        )
+        if can_pay:
+            st.link_button(
+                f"💳 Pay ${selected_fee:,.2f} via Stripe",
+                url=stripe_link,
+                use_container_width=True,
+                type="primary"
+            )
+        else:
+            st.button(
+                f"💳 Pay ${selected_fee:,.2f} via Stripe",
+                use_container_width=True,
+                type="primary",
+                disabled=True
+            )
 
 
 elif st.session_state.app_state == "success":
