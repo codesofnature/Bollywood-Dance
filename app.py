@@ -48,6 +48,16 @@ AVAILABLE_PROGRAMS = [
     "poster": "https://github.com/codesofnature/Bollywood-Dance/blob/main/4.jpg?raw=true",
     "desc": "Coordinate stunning group routines for your next big celebration.",
     "song_count": "2-3 songs"
+  },
+  {
+    "id": "5",
+    "name": "Elite Fusion Troupe",
+    "hours": 11.0,
+    "weeks": 20,
+    "fee": 2500.0,
+    "poster": "https://github.com/codesofnature/Bollywood-Dance/blob/main/5.jpg?raw=true",
+    "desc": "Advanced fusion techniques for aspiring competitive performers.",
+    "song_count": "4-5 songs"
   }
 ]
 
