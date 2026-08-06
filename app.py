@@ -15,7 +15,7 @@ AVAILABLE_PROGRAMS = [
     "hours": 0.5,
     "weeks": 20,
     "fee": 250.0,
-    "poster": "https://images.unsplash.com/photo-1524117853209-a2fc12850723?auto=format&fit=crop&w=800&q=80",
+    "poster": "https://github.com/codesofnature/Bollywood-Dance/blob/main/1.jpg?raw=true",
     "desc": "High-energy entry-level fitness infused with cinematic Bollywood flair.",
     "song_count": "4-5 songs"
   },
