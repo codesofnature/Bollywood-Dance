@@ -51,13 +51,13 @@ AVAILABLE_PROGRAMS = [
   },
   {
     "id": "5",
-    "name": "Elite Fusion Troupe",
-    "hours": 11.0,
-    "weeks": 20,
-    "fee": 2500.0,
+    "name": "Bolly Kids 7-17",
+    "hours": 1.0,
+    "weeks": 10,
+    "fee": 350.0,
     "poster": "https://github.com/codesofnature/Bollywood-Dance/blob/main/5.jpg?raw=true",
     "desc": "Advanced fusion techniques for aspiring competitive performers.",
-    "song_count": "4-5 songs"
+    "song_count": "2-3 songs"
   }
 ]
 
