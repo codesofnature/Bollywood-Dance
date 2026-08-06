@@ -292,10 +292,10 @@ if st.session_state.app_state == "home":
         st.button("Admin Portal", use_container_width=True, type="primary", on_click=navigate, args=("admin_login",))
 
 
-elif st.session_state.app_state == "register":
+elif st.session_state.app_state == "classes":
     st.markdown(
-        '<div class="bf-section-title"><h2>Student Registration</h2>'
-        '<p class="bf-muted">Enter your details to browse available programs.</p></div>',
+        '<div class="bf-section-title"><h2>Choose a Program</h2>'
+        '<p class="bf-muted">Tap a program to continue to secure checkout.</p></div>',
         unsafe_allow_html=True
     )
 
