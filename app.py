@@ -3,9 +3,11 @@ import urllib.parse
 import pandas as pd
 import re
 import os
+import stat
 import datetime
-import random
-import string
+import secrets
+import hashlib
+import html
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -74,6 +76,36 @@ AVAILABLE_PROGRAMS = [
   }
 ]
 DB_FILE = "bollyfusion_db.csv"
+
+# --- Security Helpers ---
+PBKDF2_ITERATIONS = 200_000
+
+def _secure_chmod(path):
+    # Restrict the database file to owner read/write only (best-effort; no-op on platforms
+    # without POSIX perms, e.g. some Windows setups).
+    try:
+        os.chmod(path, stat.S_IRUSR | stat.S_IWUSR)
+    except Exception:
+        pass
+
+def generate_secure_password(length=12):
+    # Cryptographically secure random password (uses `secrets`, not `random`, which is not
+    # safe for generating credentials).
+    alphabet = "abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789!@#$%"
+    return "".join(secrets.choice(alphabet) for _ in range(length))
+
+def hash_password(password, salt=None):
+    # Salted PBKDF2-HMAC-SHA256 hash. Returns (salt_hex, hash_hex). Never store or compare raw passwords.
+    if salt is None:
+        salt = secrets.token_hex(16)
+    digest = hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), bytes.fromhex(salt), PBKDF2_ITERATIONS)
+    return salt, digest.hex()
+
+def verify_password(password, salt, expected_hash):
+    if not salt or not expected_hash:
+        return False
+    _, computed = hash_password(password, salt)
+    return secrets.compare_digest(computed, expected_hash)
 
 st.markdown('''
 <style>
@@ -307,14 +339,22 @@ if "logged_in_student" not in st.session_state:
 if "student_db" not in st.session_state:
     if os.path.exists(DB_FILE):
         st.session_state.student_db = pd.read_csv(DB_FILE).to_dict('records')
+        _secure_chmod(DB_FILE)
     else:
         st.session_state.student_db = []
 
 # Update DB Function that UPSERTS to prevent garbage rows
+# NOTE: `password` param, when provided, is the PLAINTEXT password only for the
+# purpose of hashing it here / emailing it once. It is never written to disk in
+# plaintext -- only the salt + PBKDF2 hash are persisted.
 def update_db(name, email, prog_num, class_name, status, password="", fee=0.0):
     timestamp = datetime.datetime.now().strftime("%Y-%m-%d %I:%M %p")
     df = pd.DataFrame(st.session_state.student_db)
-    
+
+    pw_salt, pw_hash = (None, None)
+    if password:
+        pw_salt, pw_hash = hash_password(password)
+
     if not df.empty and email and email != "No Details Provided":
         if email in df['Email'].values:
             # Update existing user instead of adding garbage rows
@@ -324,13 +364,15 @@ def update_db(name, email, prog_num, class_name, status, password="", fee=0.0):
             df.at[idx, 'Program Number'] = prog_num
             df.at[idx, 'Class'] = class_name
             df.at[idx, 'Status'] = status
-            if password:
-                df.at[idx, 'Password'] = password
+            if pw_hash:
+                df.at[idx, 'PasswordSalt'] = pw_salt
+                df.at[idx, 'PasswordHash'] = pw_hash
             if fee:
                 df.at[idx, 'Fee'] = fee
                 
             st.session_state.student_db = df.to_dict('records')
             df.to_csv(DB_FILE, index=False)
+            _secure_chmod(DB_FILE)
             return
 
     # Add new record
@@ -341,20 +383,27 @@ def update_db(name, email, prog_num, class_name, status, password="", fee=0.0):
         "Program Number": prog_num,
         "Class": class_name,
         "Status": status,
-        "Password": password,
+        "PasswordSalt": pw_salt,
+        "PasswordHash": pw_hash,
         "Fee": fee
     }
     st.session_state.student_db.append(record)
     pd.DataFrame(st.session_state.student_db).to_csv(DB_FILE, index=False)
+    _secure_chmod(DB_FILE)
 # -------------------------------------
 
 # Email function
 def send_email_invoice(to_email, name, class_name, fee, password):
-    # TO MAKE THIS WORK: Enter your real Gmail & App Password here.
-    sender_email = "YOUR_GMAIL_HERE@gmail.com"
-    sender_password = "YOUR_APP_PASSWORD_HERE"
-    admin_email = "uday77@gmail.com"
-    
+    # Credentials are read from Streamlit secrets (.streamlit/secrets.toml), never hardcoded
+    # in source. See the secrets.toml file generated alongside this app for the expected keys.
+    sender_email = st.secrets.get("smtp_email", "")
+    sender_password = st.secrets.get("smtp_app_password", "")
+    admin_email = st.secrets.get("admin_notify_email", "")
+
+    if not sender_email or not sender_password:
+        # No SMTP configured -- skip silently rather than fail with an exception in the UI.
+        return
+
     subject = "BollyFusion Academy - Payment Invoice & Portal Login"
     body = (
         f"Hi {name},\n\n"
@@ -370,7 +419,8 @@ def send_email_invoice(to_email, name, class_name, fee, password):
         msg = MIMEMultipart()
         msg['From'] = sender_email
         msg['To'] = to_email
-        msg['Bcc'] = admin_email
+        if admin_email:
+            msg['Bcc'] = admin_email
         msg['Subject'] = subject
         msg.attach(MIMEText(body, 'plain'))
         
@@ -379,10 +429,11 @@ def send_email_invoice(to_email, name, class_name, fee, password):
         server.login(sender_email, sender_password)
         server.send_message(msg)
         server.quit()
-        st.success(f"Invoice and Portal Password emailed successfully to {to_email} and {admin_email}.")
-    except Exception as e:
-        # Fails silently for the user so it doesn't crash the app if no SMTP config is present
-        pass
+        st.success("Invoice and portal password emailed successfully.")
+    except Exception:
+        # Never surface SMTP internals (server responses, credentials-adjacent errors) to the
+        # end user -- just let them know delivery didn't happen.
+        st.warning("Payment was recorded, but the confirmation email could not be sent. Please contact the studio.")
 
 def navigate(to_state):
     st.session_state.app_state = to_state
@@ -423,9 +474,9 @@ if "status" in st.query_params and st.query_params["status"] == "success":
     if st.session_state.app_state != "success":
         st.session_state.app_state = "success"
         if st.session_state.current_user.get("Email"):
-            # Generate random 6 character password
-            gen_pw = "".join(random.choices(string.ascii_letters + string.digits, k=6))
-            
+            # Generate a cryptographically secure password (secrets module, not random)
+            gen_pw = generate_secure_password(12)
+
             update_db(
                 st.session_state.current_user["Name"],
                 st.session_state.current_user["Email"],
@@ -556,15 +607,19 @@ elif st.session_state.app_state == "checkout":
     stripe_link = st.session_state.current_user.get("Stripe Link", "#")
     checkout_url = f"{stripe_link}?prefilled_email={urllib.parse.quote(st.session_state.current_user.get('Email', ''))}"
 
+    # Escape user-supplied values before embedding in raw HTML to prevent stored/reflected XSS
+    safe_class = html.escape(str(selected_class))
+    safe_name = html.escape(str(st.session_state.current_user.get("Name", "Guest")))
+
     st.markdown(f'''
     <div class="bf-summary">
         <div>
             <span class="bf-muted">Program</span>
-            <strong>{selected_class}</strong>
+            <strong>{safe_class}</strong>
         </div>
         <div>
             <span class="bf-muted">Student</span>
-            <strong>{st.session_state.current_user.get("Name", "Guest")}</strong>
+            <strong>{safe_name}</strong>
         </div>
         <div>
             <span class="bf-muted">Amount Due</span>
@@ -616,11 +671,14 @@ elif st.session_state.app_state == "success":
     qr_data = urllib.parse.quote(f"Student:{u_name}|Class:{u_class}")
     qr_url = f"https://api.qrserver.com/v1/create-qr-code/?size=300x300&data={qr_data}"
 
+    safe_u_name = html.escape(str(u_name))
+    safe_u_class = html.escape(str(u_class))
+
     st.markdown(f'''
     <div class="bf-id">
         <div class="bf-pill">✅ Payment Successful</div>
-        <h2>{u_name}</h2>
-        <p class="bf-muted">{u_class}</p>
+        <h2>{safe_u_name}</h2>
+        <p class="bf-muted">{safe_u_class}</p>
     </div>
     ''', unsafe_allow_html=True)
 
@@ -637,31 +695,62 @@ elif st.session_state.app_state == "student_login":
         unsafe_allow_html=True
     )
 
-    s_email = st.text_input("Registered Email")
-    s_pass = st.text_input("Password", type="password")
+    # --- Basic brute-force lockout ---
+    if "student_login_attempts" not in st.session_state:
+        st.session_state.student_login_attempts = 0
+    if "student_login_locked_until" not in st.session_state:
+        st.session_state.student_login_locked_until = None
+
+    now = datetime.datetime.now()
+    locked = (st.session_state.student_login_locked_until is not None
+              and now < st.session_state.student_login_locked_until)
+
+    if locked:
+        wait_secs = int((st.session_state.student_login_locked_until - now).total_seconds())
+        st.error(f"Too many failed attempts. Please try again in {wait_secs} seconds.")
+
+    s_email = st.text_input("Registered Email", disabled=locked)
+    s_pass = st.text_input("Password", type="password", disabled=locked)
 
     st.write("")
     col1, col2 = st.columns(2)
     with col1:
         st.button("Cancel", use_container_width=True, on_click=navigate, args=("home",))
     with col2:
-        if st.button("Login", use_container_width=True, type="primary"):
+        if st.button("Login", use_container_width=True, type="primary", disabled=locked):
             df = pd.DataFrame(st.session_state.student_db)
-            if not df.empty and s_email in df['Email'].values:
-                # Get user row
+            success = False
+            if not df.empty and s_email and s_email in df['Email'].values:
                 user_row = df[df['Email'] == s_email].iloc[0]
-                if str(user_row.get('Password', '')) == s_pass and s_pass != "":
-                    st.session_state.logged_in_student = user_row.to_dict()
-                    navigate("student_dashboard")
-                else:
-                    st.error("Invalid password.")
+                if s_pass and verify_password(s_pass, user_row.get('PasswordSalt', ''), user_row.get('PasswordHash', '')):
+                    success = True
+
+            if success:
+                st.session_state.logged_in_student = user_row.to_dict()
+                st.session_state.student_login_attempts = 0
+                st.session_state.student_login_locked_until = None
+                navigate("student_dashboard")
             else:
-                st.error("Email not found in our records.")
+                # Deliberately generic message -- do not reveal whether the email exists,
+                # which would let an attacker enumerate registered students.
+                st.session_state.student_login_attempts += 1
+                if st.session_state.student_login_attempts >= 5:
+                    st.session_state.student_login_locked_until = now + datetime.timedelta(minutes=5)
+                    st.session_state.student_login_attempts = 0
+                st.error("Invalid email or password.")
 
 elif st.session_state.app_state == "student_dashboard":
     u_data = st.session_state.logged_in_student
+
+    # Escape every user-controlled field before it goes into raw HTML (unsafe_allow_html)
+    safe_name = html.escape(str(u_data.get("Name", "Student")))
+    safe_class = html.escape(str(u_data.get("Class", "Dance Class")))
+    safe_timestamp = html.escape(str(u_data.get("Timestamp", "N/A")))
+    safe_email = html.escape(str(u_data.get("Email", "N/A")))
+    safe_status = html.escape(str(u_data.get("Status", "N/A")))
+
     st.markdown(
-        f'<div class="bf-section-title"><h2>Welcome back, {u_data.get("Name", "Student")}!</h2>'
+        f'<div class="bf-section-title"><h2>Welcome back, {safe_name}!</h2>'
         '<p class="bf-muted">Here are your class details and invoice.</p></div>',
         unsafe_allow_html=True
     )
@@ -670,7 +759,7 @@ elif st.session_state.app_state == "student_dashboard":
     
     with tab1:
         st.markdown("### Class Entry QR Code")
-        st.info(f"Show this to the instructor for **{u_data.get('Class', 'Dance Class')}**.")
+        st.info(f"Show this to the instructor for **{safe_class}**.")
         qr_data = urllib.parse.quote(f"Student:{u_data.get('Name')}|Class:{u_data.get('Class')}")
         qr_url = f"https://api.qrserver.com/v1/create-qr-code/?size=300x300&data={qr_data}"
         st.image(qr_url)
@@ -679,11 +768,11 @@ elif st.session_state.app_state == "student_dashboard":
         st.markdown("### Payment Invoice")
         st.markdown(f'''
         <div class="bf-summary">
-            <div><span class="bf-muted">Date</span><strong>{u_data.get("Timestamp", "N/A")}</strong></div>
-            <div><span class="bf-muted">Student Name</span><strong>{u_data.get("Name", "N/A")}</strong></div>
-            <div><span class="bf-muted">Email</span><strong>{u_data.get("Email", "N/A")}</strong></div>
-            <div><span class="bf-muted">Service/Class</span><strong>{u_data.get("Class", "N/A")}</strong></div>
-            <div><span class="bf-muted">Status</span><strong>{u_data.get("Status", "N/A")}</strong></div>
+            <div><span class="bf-muted">Date</span><strong>{safe_timestamp}</strong></div>
+            <div><span class="bf-muted">Student Name</span><strong>{safe_name}</strong></div>
+            <div><span class="bf-muted">Email</span><strong>{safe_email}</strong></div>
+            <div><span class="bf-muted">Service/Class</span><strong>{safe_class}</strong></div>
+            <div><span class="bf-muted">Status</span><strong>{safe_status}</strong></div>
             <div><span class="bf-muted">Total Paid</span><strong class="bf-price">${float(u_data.get("Fee", 0)):,.2f}</strong></div>
         </div>
         ''', unsafe_allow_html=True)
@@ -697,12 +786,31 @@ elif st.session_state.app_state == "student_dashboard":
 elif st.session_state.app_state == "admin_login":
     st.markdown(
         '<div class="bf-section-title"><h2>🔒 Admin Login</h2>'
-        '<p class="bf-muted">Use admin / admin123.</p></div>',
+        '<p class="bf-muted">Enter your studio admin credentials.</p></div>',
         unsafe_allow_html=True
     )
 
-    a_user = st.text_input("Username")
-    a_pass = st.text_input("Password", type="password")
+    admin_user_configured = st.secrets.get("admin_username", "")
+    admin_pass_configured = st.secrets.get("admin_password", "")
+
+    if not admin_user_configured or not admin_pass_configured:
+        st.error("Admin login is not configured. Set `admin_username` and `admin_password` in `.streamlit/secrets.toml`.")
+
+    if "admin_login_attempts" not in st.session_state:
+        st.session_state.admin_login_attempts = 0
+    if "admin_login_locked_until" not in st.session_state:
+        st.session_state.admin_login_locked_until = None
+
+    now = datetime.datetime.now()
+    locked = (st.session_state.admin_login_locked_until is not None
+              and now < st.session_state.admin_login_locked_until)
+    if locked:
+        wait_secs = int((st.session_state.admin_login_locked_until - now).total_seconds())
+        st.error(f"Too many failed attempts. Please try again in {wait_secs} seconds.")
+
+    disabled = locked or not admin_user_configured or not admin_pass_configured
+    a_user = st.text_input("Username", disabled=disabled)
+    a_pass = st.text_input("Password", type="password", disabled=disabled)
 
     st.write("")
 
@@ -710,10 +818,18 @@ elif st.session_state.app_state == "admin_login":
     with col1:
         st.button("Cancel", use_container_width=True, on_click=navigate, args=("home",))
     with col2:
-        if st.button("Login", use_container_width=True, type="primary"):
-            if a_user == "manasidharmadhikari" and a_pass == "bestofbollywood7925":
+        if st.button("Login", use_container_width=True, type="primary", disabled=disabled):
+            user_ok = secrets.compare_digest(a_user, admin_user_configured)
+            pass_ok = secrets.compare_digest(a_pass, admin_pass_configured)
+            if user_ok and pass_ok:
+                st.session_state.admin_login_attempts = 0
+                st.session_state.admin_login_locked_until = None
                 navigate("admin_dashboard")
             else:
+                st.session_state.admin_login_attempts += 1
+                if st.session_state.admin_login_attempts >= 5:
+                    st.session_state.admin_login_locked_until = now + datetime.timedelta(minutes=5)
+                    st.session_state.admin_login_attempts = 0
                 st.error("Invalid credentials.")
 
 
@@ -734,12 +850,21 @@ elif st.session_state.app_state == "admin_dashboard":
                 axis=1
             )
         
-        # Editable dataframe that allows row deletion
-        edited_df = st.data_editor(df, num_rows="dynamic", use_container_width=True, hide_index=True)
+        # Editable dataframe that allows row deletion. Password hash/salt columns are stored
+        # as non-reversible PBKDF2 output (never plaintext) but are still locked read-only here
+        # so an admin can't accidentally overwrite them with garbage via the editor.
+        column_config = {}
+        if 'PasswordHash' in df.columns:
+            column_config['PasswordHash'] = st.column_config.TextColumn("PasswordHash", disabled=True)
+        if 'PasswordSalt' in df.columns:
+            column_config['PasswordSalt'] = st.column_config.TextColumn("PasswordSalt", disabled=True)
+
+        edited_df = st.data_editor(df, num_rows="dynamic", use_container_width=True, hide_index=True, column_config=column_config)
         
         if st.button("💾 Save Database Changes", type="primary"):
             st.session_state.student_db = edited_df.to_dict('records')
             edited_df.to_csv(DB_FILE, index=False)
+            _secure_chmod(DB_FILE)
             st.success("Database changes saved successfully!")
 
         csv = edited_df.to_csv(index=False).encode("utf-8")
