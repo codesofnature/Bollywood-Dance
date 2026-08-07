@@ -496,9 +496,6 @@ elif st.session_state.app_state == "checkout":
     cb2 = st.checkbox("I agree to the Media & Photography Release")
     st.caption("I grant BollyFusion Academy permission to use photographs and video recordings of me for studio-related promotional purposes.")
 
-    cb3 = st.checkbox("I agree to the Refund Policy")
-    st.caption("A free refund is available after 2 weeks of program commencement. No refunds or prorations outside this window.")
-
     st.write("")
 
     col1, col2 = st.columns(2)
