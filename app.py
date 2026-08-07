@@ -171,25 +171,60 @@ button[kind="secondary"] {
 .bf-hero p.bf-sub { font-size: 1.02rem; margin: 0 0 4px; }
 
 .media-grid {
-    display: flex; gap: 8px; overflow-x: auto; padding: 0; margin: 0;
-    scroll-snap-type: x mandatory; height: 300px;
+    position: relative; 
+    height: 300px; 
+    width: 100%; 
+    overflow: hidden; 
+    padding: 0; 
+    margin: 0;
 }
-.media-grid::-webkit-scrollbar { display: none; }
+
 .media-grid > .bf-hero-media {
-    flex: 0 0 auto; width: 78%; max-width: 340px; height: 100%; position: relative;
-    scroll-snap-align: center; overflow: hidden;
+    position: absolute; 
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100%; 
+    opacity: 0; 
+    /* Total cycle is 25 seconds (5 images x 5s each) */
+    animation: bf-fade 25s infinite; 
 }
+
+/* Stagger the start time for each of the 5 images so they crossfade */
+.media-grid > .bf-hero-media:nth-child(1) { animation-delay: 0s; }
+.media-grid > .bf-hero-media:nth-child(2) { animation-delay: 5s; }
+.media-grid > .bf-hero-media:nth-child(3) { animation-delay: 10s; }
+.media-grid > .bf-hero-media:nth-child(4) { animation-delay: 15s; }
+.media-grid > .bf-hero-media:nth-child(5) { animation-delay: 20s; }
+
 .media-grid > .bf-hero-media img {
     width: 100%; height: 100%; object-fit: cover; display: block;
+    /* Keeps the slow zoom effect you already have */
     animation: bf-kenburns 14s ease-in-out infinite alternate;
 }
-.media-grid > .bf-hero-media:nth-child(even) img { animation-direction: alternate-reverse; animation-duration: 18s; }
+.media-grid > .bf-hero-media:nth-child(even) img { 
+    animation-direction: alternate-reverse; 
+    animation-duration: 18s; 
+}
+
+/* The math: 5 images = each gets 20% of the timeline to shine */
+@keyframes bf-fade {
+    0%   { opacity: 0; }
+    8%   { opacity: 1; }
+    20%  { opacity: 1; }
+    28%  { opacity: 0; }
+    100% { opacity: 0; }
+}
+
 @keyframes bf-kenburns {
     0%   { transform: scale(1) translate(0,0); }
     100% { transform: scale(1.18) translate(-2%, -2%); }
 }
+
 @media (prefers-reduced-motion: reduce) {
-    .media-grid > .bf-hero-media img { animation: none; }
+    .media-grid > .bf-hero-media img,
+    .media-grid > .bf-hero-media { animation: none; opacity: 1; position: relative; display: none; }
+    .media-grid > .bf-hero-media:first-child { display: block; }
 }
 
 .bf-muted { color: rgba(253, 251, 247, .7); }
