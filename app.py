@@ -27,7 +27,7 @@ AVAILABLE_PROGRAMS = [
     "weeks": 20,
     "fee": 250.0,
     "stripe_link": "https://buy.stripe.com/6oU00jgpm9IUfJLezI9R603",
-    "poster": "https://github.com/codesofnature/Bollywood-Dance/blob/main/1.jpg?raw=true",
+    "poster": "https://images.unsplash.com/photo-1712192682756-ae5b3a8e7508?auto=format&fit=crop&w=800&q=80",
     "desc": "High-energy entry-level fitness infused with cinematic Bollywood flair.",
     "song_count": "4-5 songs"
   },
@@ -38,7 +38,7 @@ AVAILABLE_PROGRAMS = [
     "weeks": 20,
     "fee": 500.0,
     "stripe_link": "https://buy.stripe.com/00waEX3CA8EQapr1MW9R604",
-    "poster": "https://github.com/codesofnature/Bollywood-Dance/blob/main/2.jpg?raw=true",
+    "poster": "https://images.unsplash.com/photo-1563775957285-5860ffa885c0?auto=format&fit=crop&w=800&q=80",
     "desc": "Level up your stamina with complex beats and faster choreography.",
     "song_count": "4-5 songs"
   },
@@ -49,7 +49,7 @@ AVAILABLE_PROGRAMS = [
     "weeks": 10,
     "fee": 1500.0,
     "stripe_link": "https://buy.stripe.com/3cIbJ15KI08keFH9fo9R605",
-    "poster": "https://github.com/codesofnature/Bollywood-Dance/blob/main/3.jpg?raw=true",
+    "poster": "https://images.unsplash.com/photo-1547106510-6aec13ee41ff?auto=format&fit=crop&w=800&q=80",
     "desc": "Perfect for events/weddings/performances! Master partner choreography with elegance and grace.",
     "song_count": "2-3 songs"
   },
@@ -60,7 +60,7 @@ AVAILABLE_PROGRAMS = [
     "weeks": 10,
     "fee": 1000.0,
     "stripe_link": "https://buy.stripe.com/14A14n7SQ6wI8hj3V49R606",
-    "poster": "https://github.com/codesofnature/Bollywood-Dance/blob/main/4.jpg?raw=true",
+    "poster": "https://images.unsplash.com/photo-1563775956525-94c339ff0be7?auto=format&fit=crop&w=800&q=80",
     "desc": "Coordinate stunning group routines for your next big celebration or event.",
     "song_count": "2-3 songs"
   },
@@ -71,7 +71,7 @@ AVAILABLE_PROGRAMS = [
     "weeks": 12,
     "fee": 500.0,
     "stripe_link": "https://buy.stripe.com/aFa14n6OM4oA1SVfDM9R607",
-    "poster": "https://github.com/codesofnature/Bollywood-Dance/blob/main/5.jpg?raw=true",
+    "poster": "https://images.unsplash.com/photo-1650709244890-cc35b30d8036?auto=format&fit=crop&w=800&q=80",
     "desc": "High energy dance for the youngster techniques for aspiring competitive performers.",
     "song_count": "2-3 songs"
   }
@@ -145,45 +145,110 @@ button[kind="secondary"] {
 }
 
 .bf-hero {
-    border-radius: 28px; padding: 32px 20px;
+    position: relative; border-radius: 28px; padding: 0; overflow: hidden;
     border: 1px solid rgba(255, 255, 255, .12);
-    background: linear-gradient(135deg, rgba(255, 0, 127, .2), rgba(255, 170, 0, .15), rgba(138, 43, 226, .15));
+    box-shadow: 0 20px 50px rgba(0,0,0,0.45);
     text-align: center; margin-bottom: 18px;
 }
 
-.bf-pill {
-    display: inline-block; padding: 8px 12px; border-radius: 999px;
-    background: rgba(255, 255, 255, .08); border: 1px solid rgba(255, 255, 255, .12);
-    font-size: 13px; font-weight: 800; margin-bottom: 12px;
+.bf-hero-inner {
+    position: relative; z-index: 2;
+    padding: 40px 20px 24px;
+    background: linear-gradient(180deg, rgba(10,5,16,.55) 0%, rgba(10,5,16,.55) 55%, rgba(10,5,16,.95) 100%);
 }
 
-.bf-hero h1 { margin: 0 0 10px; font-size: clamp(2rem, 5vw, 3.3rem); line-height: 1.04; letter-spacing: -.04em; }
+.bf-pill {
+    display: inline-block; padding: 8px 14px; border-radius: 999px;
+    background: rgba(255, 255, 255, .1); border: 1px solid rgba(255, 255, 255, .18);
+    font-size: 13px; font-weight: 800; margin-bottom: 14px; backdrop-filter: blur(6px);
+}
+
+.bf-hero h1 {
+    margin: 0 0 10px; font-size: clamp(2rem, 6vw, 3.4rem); line-height: 1.05; letter-spacing: -.04em;
+    text-shadow: 0 4px 24px rgba(0,0,0,.5);
+}
 
 .bf-gradient {
     background: linear-gradient(90deg, #ffaa00, #ff007f, #8a2be2);
     -webkit-background-clip: text; -webkit-text-fill-color: transparent;
 }
 
-.media-grid { 
-    display: flex; gap: 10px; overflow-x: auto; padding: 10px 0; margin-top: 15px; 
-    scroll-snap-type: x mandatory;
+.bf-hero p.bf-sub { font-size: 1.02rem; margin: 0 0 4px; }
+
+.bf-trustrow {
+    display: flex; justify-content: center; gap: 18px; flex-wrap: wrap;
+    margin-top: 16px; font-size: 12.5px; font-weight: 700; color: rgba(253,251,247,.85);
+}
+.bf-trustrow span { display: inline-flex; align-items: center; gap: 6px; }
+
+.media-grid {
+    display: flex; gap: 8px; overflow-x: auto; padding: 0; margin: 0;
+    scroll-snap-type: x mandatory; height: 300px;
 }
 .media-grid::-webkit-scrollbar { display: none; }
-.media-grid > * {
-    flex: 0 0 auto; width: 240px; height: 140px; border-radius: 12px; 
-    object-fit: cover; border: 1px solid rgba(255,255,255,0.2); scroll-snap-align: center;
+.media-grid > .bf-hero-media {
+    flex: 0 0 auto; width: 78%; max-width: 340px; height: 100%; position: relative;
+    scroll-snap-align: center; overflow: hidden;
+}
+.media-grid > .bf-hero-media img {
+    width: 100%; height: 100%; object-fit: cover; display: block;
+    animation: bf-kenburns 14s ease-in-out infinite alternate;
+}
+.media-grid > .bf-hero-media:nth-child(even) img { animation-direction: alternate-reverse; animation-duration: 18s; }
+@keyframes bf-kenburns {
+    0%   { transform: scale(1) translate(0,0); }
+    100% { transform: scale(1.18) translate(-2%, -2%); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .media-grid > .bf-hero-media img { animation: none; }
 }
 
 .bf-muted { color: rgba(253, 251, 247, .7); }
+
+.bf-features {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 4px 0 18px;
+}
+.bf-feature {
+    border-radius: 16px; padding: 14px 10px; text-align: center;
+    background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.1);
+}
+.bf-feature .bf-feature-emoji { font-size: 1.4rem; display: block; margin-bottom: 4px; }
+.bf-feature .bf-feature-label { font-size: 12px; font-weight: 800; color: rgba(253,251,247,.9); }
+
 .bf-card {
     border-radius: 24px; overflow: hidden; border: 1px solid rgba(255, 255, 255, .15);
     background: rgba(255, 255, 255, .05); margin-bottom: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+    transition: transform .15s ease, box-shadow .15s ease;
 }
 .bf-media { position: relative; aspect-ratio: 16 / 10; }
 .bf-media img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.bf-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(10, 5, 16, .85), transparent 60%); }
+.bf-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(10, 5, 16, .9), transparent 60%); }
+.bf-badge {
+    position: absolute; top: 10px; right: 10px; padding: 5px 10px; border-radius: 999px;
+    background: rgba(10,5,16,.6); border: 1px solid rgba(255,255,255,.2);
+    font-size: 11px; font-weight: 800; backdrop-filter: blur(4px);
+}
 .bf-body { padding: 16px; }
+.bf-body h3 { margin: 0 0 2px; font-size: 1.05rem; }
 .bf-price { font-size: 1.25rem; font-weight: 900; color: #00e676; margin-top: 8px; }
+
+/* --- Floating chat launcher + popup panel --- */
+div.st-key-bf_fab { position: fixed; right: 20px; bottom: 20px; z-index: 999998; width: 60px; }
+div.st-key-bf_fab button {
+    width: 60px !important; height: 60px !important; min-height: 60px !important;
+    border-radius: 50% !important; font-size: 26px !important; padding: 0 !important;
+    background: linear-gradient(135deg, #ff007f, #ffaa00) !important; color: #fff !important;
+    border: none !important; box-shadow: 0 8px 24px rgba(255,0,127,.5) !important;
+}
+
+div.st-key-bf_chat_panel {
+    position: fixed; right: 20px; bottom: 92px; z-index: 999999;
+    width: min(360px, calc(100vw - 40px)); max-height: 70vh;
+    background: #140a20; border: 1px solid rgba(255,255,255,.18); border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.6); padding: 14px 14px 8px;
+    overflow-y: auto;
+}
+div.st-key-bf_chat_panel div[data-testid="stChatMessage"] { padding: 6px 0; }
 
 </style>
 ''', unsafe_allow_html=True)
@@ -304,18 +369,26 @@ if "status" in st.query_params and st.query_params["status"] == "success":
 
 
 if st.session_state.app_state == "home":
-    # Splash UI containing 5 placeholder components (3 Imgs, 2 Vids) 
+    # Splash UI: curated, real Bollywood-dance photography with a slow Ken Burns
+    # drift (no broken/irrelevant placeholder video files).
     st.markdown('''
     <div class="bf-hero">
-        <div class="bf-pill">🎬 Bollywood Dance Studio</div>
-        <h1>Master Cinematic Dance on Any Stage, <span class="bf-gradient">built for every stage</span></h1>
-        <p class="bf-muted">Choose, Register, Pay</p>
         <div class="media-grid">
-            <img src="https://images.unsplash.com/photo-1543857778-c4a1a3e0b2eb?auto=format&fit=crop&w=400&q=80" alt="Image 1"/>
-            <video autoplay loop muted playsinline src="https://www.w3schools.com/html/mov_bbb.mp4"></video>
-            <img src="https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=400&q=80" alt="Image 2"/>
-            <video autoplay loop muted playsinline src="https://www.w3schools.com/html/mov_bbb.mp4"></video>
-            <img src="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=400&q=80" alt="Image 3"/>
+            <div class="bf-hero-media"><img src="https://images.unsplash.com/photo-1463592177119-bab2a00f3ccb?auto=format&fit=crop&w=700&q=80" alt="Dancers performing a traditional Bollywood routine"/></div>
+            <div class="bf-hero-media"><img src="https://images.unsplash.com/photo-1563775956525-94c339ff0be7?auto=format&fit=crop&w=700&q=80" alt="Group dancing on stage in colorful costume"/></div>
+            <div class="bf-hero-media"><img src="https://images.unsplash.com/photo-1517151692071-54b58b01b550?auto=format&fit=crop&w=700&q=80" alt="High-energy Bollywood performance"/></div>
+            <div class="bf-hero-media"><img src="https://images.unsplash.com/photo-1650709244890-cc35b30d8036?auto=format&fit=crop&w=700&q=80" alt="Dancers in traditional festive dress"/></div>
+            <div class="bf-hero-media"><img src="https://images.unsplash.com/photo-1747723836721-98e6c681dfcc?auto=format&fit=crop&w=700&q=80" alt="Dancer in traditional Indian attire mid-performance"/></div>
+        </div>
+        <div class="bf-hero-inner">
+            <div class="bf-pill">🎬 Bollywood Dance Studio</div>
+            <h1>Master Cinematic Dance on Any Stage, <span class="bf-gradient">built for every stage</span></h1>
+            <p class="bf-sub bf-muted">Choose a program, register, and pay securely — all in a couple of minutes.</p>
+            <div class="bf-trustrow">
+                <span>💃 All levels welcome</span>
+                <span>🎉 Wedding &amp; event choreography</span>
+                <span>🏆 Performance-ready training</span>
+            </div>
         </div>
     </div>
     ''', unsafe_allow_html=True)
@@ -326,41 +399,162 @@ if st.session_state.app_state == "home":
     with col1: st.button("Browse Program Options", use_container_width=True, type="primary", on_click=navigate, args=("register",))
     with col2: st.button("Registered Student Portal", use_container_width=True, on_click=navigate, args=("student_login",))
     with col3: st.button("Teacher Portal", use_container_width=True, on_click=navigate, args=("admin_login",))
-    
-    st.divider()
-    
-    # Splash Screen Chatbot logic
-    st.markdown("### 💬 Chat with us")
-    
+
+    st.write("")
+    st.markdown('''
+    <div class="bf-features">
+        <div class="bf-feature"><span class="bf-feature-emoji">🩰</span><span class="bf-feature-label">Beginner &rarr; Company</span></div>
+        <div class="bf-feature"><span class="bf-feature-emoji">🎶</span><span class="bf-feature-label">Real Bollywood Choreo</span></div>
+        <div class="bf-feature"><span class="bf-feature-emoji">💳</span><span class="bf-feature-label">Secure Stripe Checkout</span></div>
+    </div>
+    ''', unsafe_allow_html=True)
+
+    # --- FAQ knowledge base: fully aware of the studio's actual offered programs ---
+    def _fmt_money(v):
+        return f"${v:,.0f}" if float(v) == int(v) else f"${v:,.2f}"
+
+    def _program_names():
+        return [p["name"] for p in AVAILABLE_PROGRAMS] if AVAILABLE_PROGRAMS else []
+
+    def _fee_range():
+        if not AVAILABLE_PROGRAMS: return "please check Browse Program Options"
+        fees = [p["fee"] for p in AVAILABLE_PROGRAMS]
+        return f"{_fmt_money(min(fees))} to {_fmt_money(max(fees))}" if min(fees) != max(fees) else _fmt_money(fees[0])
+
+    def _kids_program():
+        return next((p for p in AVAILABLE_PROGRAMS if "kid" in p["name"].lower()), None)
+
+    def _event_programs():
+        return [p for p in AVAILABLE_PROGRAMS if any(k in p["name"].lower() for k in ["event", "couple"])]
+
+    def _company_program():
+        return next((p for p in AVAILABLE_PROGRAMS if any(k in p["name"].lower() for k in ["premier", "company"])), None)
+
+    def _cardio_programs():
+        return [p for p in AVAILABLE_PROGRAMS if "cardio" in p["name"].lower()]
+
+    names = _program_names()
+    names_str = ", ".join(names) if names else "our current programs (see Browse Program Options)"
+    kids_p = _kids_program()
+    company_p = _company_program()
+    event_ps = _event_programs()
+    cardio_ps = _cardio_programs()
+
+    FAQS = [
+        {"q": "What programs / levels do you offer?",
+         "kw": ["program", "level", "class", "offer", "options", "types"],
+         "a": f"We currently offer: **{names_str}**. Each is designed for a different stage — from first-timers to performance-ready dancers. Tap 'Browse Program Options' to see full details."},
+        {"q": "How much do classes cost?",
+         "kw": ["price", "cost", "fee", "how much", "expensive", "pricing"],
+         "a": f"Program fees range from **{_fee_range()}** for the full term, depending on the level and number of weeks. Tap 'Browse Program Options' for exact pricing per class."},
+        {"q": "What ages do you teach?",
+         "kw": ["age", "kid", "child", "children", "young", "adult", "teen"],
+         "a": (f"We welcome adults in most programs, plus a dedicated **{kids_p['name']}** class for younger dancers." if kids_p
+               else "Our programs are primarily designed for teens and adults — check Browse Program Options for the age focus of each level.")},
+        {"q": "Do I need prior dance experience?",
+         "kw": ["experience", "beginner", "never danced", "background", "new to dance", "first time"],
+         "a": "Not at all! Our entry-level cardio classes are built for total beginners — no dance background needed. As you progress, later levels add more technical choreography."},
+        {"q": "What should I wear to class?",
+         "kw": ["wear", "outfit", "clothes", "attire", "shoes", "dress code"],
+         "a": "Comfortable, breathable workout clothes and supportive sneakers or dance sneakers work best. Avoid anything restrictive — you'll be moving a lot!"},
+        {"q": "How long is each program / how many weeks?",
+         "kw": ["weeks", "duration", "long", "term", "how many classes"],
+         "a": "Program length varies by level, generally 10-20 weeks per term. Exact duration for each program is shown on the 'Browse Program Options' page."},
+        {"q": "Is there a trial or drop-in class?",
+         "kw": ["trial", "drop in", "try", "sample", "first class free"],
+         "a": "We don't run a separate free trial — registration secures your spot for the full program term. If you're unsure which level fits you, message us here and we'll point you in the right direction."},
+        {"q": "How do I sign up / register?",
+         "kw": ["sign up", "register", "enroll", "join", "how do i start"],
+         "a": "Tap 'Browse Program Options', enter your name and email, choose your program, and complete secure checkout. You'll get portal login details by email right after payment."},
+        {"q": "What payment methods do you accept?",
+         "kw": ["payment", "pay", "stripe", "credit card", "card", "venmo"],
+         "a": "We accept all major credit/debit cards through secure Stripe checkout — no cash or manual payment needed to register."},
+        {"q": "What is Bollywood dance / cardio style like?",
+         "kw": ["what is bollywood", "style", "what kind of dance", "genre"],
+         "a": "Bollywood dance blends high-energy cinematic choreography from Indian films with elements of hip-hop, folk, and classical Indian movement — it's fun, expressive, and a great workout."},
+        {"q": "Do you host performances or showcase events?",
+         "kw": ["event", "performance", "showcase", "recital", "perform"],
+         "a": "Yes! Several programs include live events and showcases through the year — details and any event fees are listed per program on the pricing page."},
+        {"q": "What's the difference between Cardio I and Cardio II?",
+         "kw": ["cardio 1", "cardio i", "cardio 2", "cardio ii", "difference between", "which cardio"],
+         "a": (f"**{cardio_ps[0]['name']}** is the entry-level class focused on fundamentals and fitness. **{cardio_ps[1]['name']}** builds on that with faster combinations and more complex choreography." if len(cardio_ps) >= 2
+               else "Our cardio levels progress from fundamentals to faster, more complex choreography as you move up.")},
+        {"q": "Do you offer wedding or couples choreography?",
+         "kw": ["wedding", "couple", "sangeet", "first dance", "engagement"],
+         "a": (f"Yes — our **{event_ps[0]['name']}** program is built exactly for that: personalized partner choreography for weddings, sangeets, and special events." if event_ps
+               else "We offer small-group and couples choreography for weddings and events — see Browse Program Options for current availability.")},
+        {"q": "Do you offer private lessons or group event choreography?",
+         "kw": ["private lesson", "group choreography", "custom routine", "book a routine"],
+         "a": (f"Our **{event_ps[-1]['name']}** program covers custom group routines for celebrations and events. For fully private 1-on-1 lessons, message us here and we'll follow up directly." if event_ps
+               else "For custom group or private choreography requests, please message us here and our team will follow up directly.")},
+        {"q": "Where is the studio located?",
+         "kw": ["location", "where", "address", "studio", "directions"],
+         "a": "We're at our Main Studio location. Exact address and entry details are sent automatically to registered students after checkout for security."},
+        {"q": "What is your cancellation / refund policy?",
+         "kw": ["refund", "cancel", "cancellation", "reschedule", "policy"],
+         "a": "Program fees cover the full term once classes begin. For cancellations before a term starts, or any special circumstances, please contact the studio directly and we'll help sort it out."},
+        {"q": "How many songs will we learn?",
+         "kw": ["songs", "how many routines", "choreography count", "music"],
+         "a": ("Shorter terms typically cover 2-3 songs, while full 20-week terms cover 4-5 full routines" + (f" — for example, **{AVAILABLE_PROGRAMS[0]['name']}** covers {AVAILABLE_PROGRAMS[0]['song_count']}." if AVAILABLE_PROGRAMS else "."))},
+        {"q": "Is Bollywood dance a good workout?",
+         "kw": ["workout", "fitness", "cardio workout", "calories", "exercise", "burn"],
+         "a": "Definitely — it's a full-body cardio workout disguised as fun. Expect an elevated heart rate, improved coordination, and serious stamina gains over a term."},
+        {"q": "Do I get an online student portal after registering?",
+         "kw": ["portal", "login", "account", "dashboard", "qr code"],
+         "a": "Yes — once you complete checkout, we email you a secure portal login (with a generated password) where you can view your class details and entry QR code."},
+        {"q": "Is there a company / advanced performance team?",
+         "kw": ["company", "advanced team", "competitive", "premier"],
+         "a": (f"Yes — **{company_p['name']}** is our flagship, audition-caliber team for stage-ready, competitive-level dancers." if company_p
+               else "Yes — our top level is reserved for advanced, performance-ready dancers. Check Browse Program Options for current availability.")},
+        {"q": "How can I contact the studio for more help?",
+         "kw": ["contact", "phone", "email", "call", "support", "help", "talk to someone"],
+         "a": "Happy to help directly — please call our support line at **2341239239**, or leave your question here and we'll follow up."},
+    ]
+
+    def _match_faq(user_text):
+        text = user_text.lower()
+        best, best_score = None, 0
+        for item in FAQS:
+            score = sum(1 for kw in item["kw"] if kw in text)
+            if score > best_score:
+                best, best_score = item, score
+        return best if best_score > 0 else None
+
     if "chat_history" not in st.session_state:
-        st.session_state.chat_history = [{"role": "assistant", "content": "Hi! Do you have any questions about our programs, schedules, or pricing?"}]
+        st.session_state.chat_history = [{"role": "assistant", "content": "Hi! 👋 Ask me about our programs, pricing, schedules, attire, or anything else about the studio."}]
     if "chat_failed_attempts" not in st.session_state:
         st.session_state.chat_failed_attempts = 0
+    if "chat_open" not in st.session_state:
+        st.session_state.chat_open = False
 
-    for msg in st.session_state.chat_history:
-        st.chat_message(msg["role"]).write(msg["content"])
+    def _toggle_chat():
+        st.session_state.chat_open = not st.session_state.chat_open
 
-    prompt = st.chat_input("Ask a question...")
-    if prompt:
-        st.session_state.chat_history.append({"role": "user", "content": prompt})
-        prompt_lower = prompt.lower()
-        
-        # Prepopulated logic
-        if any(word in prompt_lower for word in ["price", "cost", "fee", "how much"]):
-            answer = "Our classes range based on the level and duration. Tap 'Browse Program Options' above for full pricing details!"
-        elif any(word in prompt_lower for word in ["schedule", "time", "when", "days"]):
-            answer = "Schedules vary by program. Please browse our program options to see specific class dates and hours."
-        elif any(word in prompt_lower for word in ["location", "where", "studio"]):
-            answer = "We are located at the Main Studio. Registered students receive exact access/entry details upon checkout."
-        else:
-            st.session_state.chat_failed_attempts += 1
-            if st.session_state.chat_failed_attempts >= 3:
-                answer = "I'm sorry, I couldn't find a good answer to your recent questions. **Please contact our support at 2341239239** for immediate assistance."
-            else:
-                answer = "I'm not quite sure about that. Could you ask something else regarding prices, schedule, or location?"
-                
-        st.session_state.chat_history.append({"role": "assistant", "content": answer})
-        st.rerun()
+    # Floating chat launcher icon (fixed bottom-right, pops the panel open/closed)
+    with st.container(key="bf_fab"):
+        st.button("💬" if not st.session_state.chat_open else "✖️", key="bf_fab_btn", on_click=_toggle_chat)
+
+    if st.session_state.chat_open:
+        with st.container(key="bf_chat_panel"):
+            st.markdown("**💬 Chat with BollyFusion**")
+            for msg in st.session_state.chat_history:
+                st.chat_message(msg["role"]).write(msg["content"])
+
+            prompt = st.chat_input("Ask about programs, pricing, schedule...")
+            if prompt:
+                st.session_state.chat_history.append({"role": "user", "content": prompt})
+                match = _match_faq(prompt)
+                if match:
+                    answer = match["a"]
+                    st.session_state.chat_failed_attempts = 0
+                else:
+                    st.session_state.chat_failed_attempts += 1
+                    if st.session_state.chat_failed_attempts >= 3:
+                        answer = "I'm sorry, I couldn't find a good answer to your recent questions. **Please call our support at 2341239239** for immediate assistance."
+                    else:
+                        answer = "I'm not quite sure about that. Try asking about programs, pricing, age groups, attire, schedule, or events!"
+                st.session_state.chat_history.append({"role": "assistant", "content": answer})
+                st.rerun()
 
 elif st.session_state.app_state == "register":
     st.markdown('<div class="bf-section-title"><h2>BROWSE PROGRAM OPTIONS AND PRICES</h2><p class="bf-muted">Enter your details, or simply browse.</p></div>', unsafe_allow_html=True)
