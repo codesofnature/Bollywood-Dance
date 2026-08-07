@@ -374,11 +374,11 @@ if st.session_state.app_state == "home":
     st.markdown('''
     <div class="bf-hero">
         <div class="media-grid">
-            <div class="bf-hero-media"><img src="https://images.unsplash.com/photo-1463592177119-bab2a00f3ccb?auto=format&fit=crop&w=700&q=80" alt="Dancers performing a traditional Bollywood routine"/></div>
-            <div class="bf-hero-media"><img src="https://images.unsplash.com/photo-1563775956525-94c339ff0be7?auto=format&fit=crop&w=700&q=80" alt="Group dancing on stage in colorful costume"/></div>
-            <div class="bf-hero-media"><img src="https://images.unsplash.com/photo-1517151692071-54b58b01b550?auto=format&fit=crop&w=700&q=80" alt="High-energy Bollywood performance"/></div>
-            <div class="bf-hero-media"><img src="https://images.unsplash.com/photo-1650709244890-cc35b30d8036?auto=format&fit=crop&w=700&q=80" alt="Dancers in traditional festive dress"/></div>
-            <div class="bf-hero-media"><img src="https://images.unsplash.com/photo-1747723836721-98e6c681dfcc?auto=format&fit=crop&w=700&q=80" alt="Dancer in traditional Indian attire mid-performance"/></div>
+            <div class="bf-hero-media"><img src="https://github.com/codesofnature/Bollywood-Dance/blob/4dcb2186d5a9907998e63d390443477be4ce7bae/s1.jpg" alt="Dancers performing a traditional Bollywood routine"/></div>
+            <div class="bf-hero-media"><img src="https://github.com/codesofnature/Bollywood-Dance/blob/4dcb2186d5a9907998e63d390443477be4ce7bae/s2.jpg" alt="Group dancing on stage in colorful costume"/></div>
+            <div class="bf-hero-media"><img src="https://github.com/codesofnature/Bollywood-Dance/blob/4dcb2186d5a9907998e63d390443477be4ce7bae/s3.jpg" alt="High-energy Bollywood performance"/></div>
+            <div class="bf-hero-media"><img src="https://github.com/codesofnature/Bollywood-Dance/blob/4dcb2186d5a9907998e63d390443477be4ce7bae/s4.jpg" alt="Dancers in traditional festive dress"/></div>
+            <div class="bf-hero-media"><img src="https://github.com/codesofnature/Bollywood-Dance/blob/4dcb2186d5a9907998e63d390443477be4ce7bae/s5.jpg" alt="Dancer in traditional Indian attire mid-performance"/></div>
         </div>
         <div class="bf-hero-inner">
             <h1>Master Cinematic Dance on Any Stage, <span class="bf-gradient">built for every stage</span></h1>
