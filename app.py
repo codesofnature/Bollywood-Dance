@@ -263,20 +263,37 @@ div.st-key-bf_chat_panel {
     overflow-y: auto !important;
 }
 
-div.st-key-bf_chat_panel div[data-testid="stChatMessage"] { 
-    padding: 12px !important; 
-    background-color: rgba(255, 255, 255, 0.08) !important; 
-    border-radius: 12px !important;
-    margin-bottom: 8px !important;
+/* Custom Flexbox Chat Bubbles (Left/Right Layout) */
+.bf-chat-row {
+    display: flex;
+    width: 100%;
+    margin-bottom: 12px;
 }
-
-/* Strip the default grey backgrounds off Streamlit's inner message wrappers */
-div.st-key-bf_chat_panel div[data-testid="stChatMessage"] > div {
-    background-color: transparent !important;
+.bf-chat-row.user {
+    justify-content: flex-end; /* Pushes user messages to the right */
 }
-
-/* Force EVERY text element inside the bubble to be white, regardless of markdown wrappers */
-div.st-key-bf_chat_panel div[data-testid="stChatMessage"] * {
+.bf-chat-row.bot {
+    justify-content: flex-start; /* Pushes bot messages to the left */
+}
+.bf-chat-bubble {
+    padding: 10px 14px;
+    border-radius: 18px;
+    max-width: 85%;
+    font-size: 15px;
+    line-height: 1.4;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+.bf-chat-row.user .bf-chat-bubble {
+    background-color: #007AFF !important; /* Blue user bubble */
+    border-bottom-right-radius: 4px;
+}
+.bf-chat-row.bot .bf-chat-bubble {
+    background-color: #34C759 !important; /* Green bot bubble */
+    border-bottom-left-radius: 4px;
+}
+/* Force all text inside the bubbles to be crisp white */
+.bf-chat-bubble p, .bf-chat-bubble * {
+    margin: 0 !important;
     color: #fdfbf7 !important;
 }
 
