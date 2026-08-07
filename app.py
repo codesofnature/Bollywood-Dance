@@ -289,6 +289,27 @@ def update_db(name, email, prog_num, class_name, status, password="", fee=0.0):
         df.to_csv(DB_FILE, index=False)
         _secure_chmod(DB_FILE)
 
+# One-time demo seed: gives the teacher 3 already-paid students to look at
+# the very first time the app runs. Runs only while DB_FILE doesn't exist yet,
+# so it never re-adds students on later reruns/restarts.
+def _seed_demo_students():
+    if os.path.exists(DB_FILE) or not AVAILABLE_PROGRAMS:
+        return
+    demo_students = [
+        {"name": "Priya Sharma",  "email": "priya.sharma@example.com"},
+        {"name": "Arjun Mehta",   "email": "arjun.mehta@example.com"},
+        {"name": "Simone Clarke", "email": "simone.clarke@example.com"},
+    ]
+    for i, s in enumerate(demo_students):
+        prog = AVAILABLE_PROGRAMS[i % len(AVAILABLE_PROGRAMS)]
+        demo_password = generate_secure_password(12)
+        update_db(
+            s["name"], s["email"], prog["id"], prog["name"],
+            "Paid ✅", password=demo_password, fee=prog["fee"]
+        )
+
+_seed_demo_students()
+
 def send_email_invoice(to_email, name, class_name, fee, password):
     sender_email = st.secrets.get("smtp_email", "")
     sender_password = st.secrets.get("smtp_app_password", "")
@@ -616,6 +637,7 @@ elif st.session_state.app_state == "student_login":
                 if verify_password(s_pass, user_row.get('PasswordSalt', ''), user_row.get('PasswordHash', '')):
                     st.session_state.logged_in_student = user_row.to_dict()
                     navigate("student_dashboard")
+                    st.rerun()
                 else: st.error("Invalid credentials.")
             else: st.error("Invalid credentials.")
 
@@ -634,9 +656,56 @@ elif st.session_state.app_state == "admin_login":
         if st.button("Login", use_container_width=True, type="primary"):
             if secrets.compare_digest(a_user, st.secrets.get("admin_username", "")) and secrets.compare_digest(a_pass, st.secrets.get("admin_password", "")):
                 navigate("admin_dashboard")
+                st.rerun()
             else: st.error("Invalid credentials.")
 
 elif st.session_state.app_state == "admin_dashboard":
-    if st.session_state.student_db:
-        st.data_editor(pd.DataFrame(st.session_state.student_db))
+    st.markdown('<div class="bf-section-title"><h2>Registered Students</h2><p class="bf-muted">Full profile for every student who has registered or paid.</p></div>', unsafe_allow_html=True)
+
+    if not st.session_state.student_db:
+        st.info("No students yet. They'll appear here as soon as someone registers or pays.")
+    else:
+        df_students = pd.DataFrame(st.session_state.student_db)
+        paid_count = int((df_students.get("Status", pd.Series(dtype=str)) == "Paid ✅").sum())
+        m1, m2 = st.columns(2)
+        m1.metric("Total Students", len(df_students))
+        m2.metric("Paid", paid_count)
+
+        st.write("")
+        view_mode = st.radio("View", ["Profile Cards", "Raw Table"], horizontal=True, label_visibility="collapsed")
+
+        if view_mode == "Profile Cards":
+            for _, row in df_students.iloc[::-1].iterrows():
+                status = row.get("Status", "-")
+                fee_val = row.get("Fee", 0)
+                try:
+                    fee_display = f"${float(fee_val):,.2f}"
+                except (TypeError, ValueError):
+                    fee_display = "-"
+                badge = "✅" if status == "Paid ✅" else "⏳"
+                with st.expander(f"{badge} {row.get('Name', 'Unknown')} — {row.get('Class', '-')}"):
+                    pc1, pc2 = st.columns(2)
+                    with pc1:
+                        st.markdown(f"**Name:** {row.get('Name', '-')}")
+                        st.markdown(f"**Email:** {row.get('Email', '-')}")
+                        st.markdown(f"**Program:** {row.get('Class', '-')} (#{row.get('Program Number', '-')})")
+                        st.markdown(f"**Status:** {status}")
+                    with pc2:
+                        st.markdown(f"**Fee:** {fee_display}")
+                        st.markdown(f"**Registered:** {row.get('Timestamp', '-')}")
+                        st.markdown(f"**Portal Login Set:** {'Yes' if row.get('PasswordHash') else 'No'}")
+        else:
+            st.dataframe(
+                df_students.drop(columns=["PasswordSalt", "PasswordHash"], errors="ignore"),
+                use_container_width=True
+            )
+            st.caption("Passwords are hashed and hidden here for security. Use the CSV export below if you need the full raw record.")
+            st.download_button(
+                "⬇️ Export students CSV",
+                data=df_students.to_csv(index=False).encode("utf-8"),
+                file_name="bollyfusion_students_export.csv",
+                mime="text/csv"
+            )
+
+    st.write("")
     if st.button("Logout", use_container_width=True, on_click=navigate, args=("home",)): pass
