@@ -266,16 +266,16 @@ div.st-key-bf_chat_panel {
 /* Force chat bubbles to have a slightly lighter background so they contrast against the panel */
 /* Force chat bubbles to have a slightly lighter background */
 /* Force chat bubbles to have a slightly lighter background */
-div.st-key-bf_chat_panel div[data-testid="stChatMessage"] { 
-    padding: 12px !important; 
-    background: rgba(255, 255, 255, 0.08) !important; 
-    border-radius: 12px !important;
-    margin-bottom: 8px !important;
+div.st-key-bf_chat_panel div[data-testid="stChatInput"],
+div.st-key-bf_chat_panel div[data-testid="stChatInput"] div {
+    background-color: #140a20 !important; 
 }
 
-/* Explicitly target the paragraph tags inside the bubbles for white text */
-div.st-key-bf_chat_panel div[data-testid="stChatMessage"] p {
+/* Force the actual typing area to be transparent (so the dark background shows) and keep text white */
+div.st-key-bf_chat_panel div[data-testid="stChatInput"] textarea {
+    background-color: transparent !important;
     color: #fdfbf7 !important;
+    -webkit-text-fill-color: #fdfbf7 !important; 
 }
 
 /* Fix the white background on the chat input container */
