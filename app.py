@@ -120,7 +120,7 @@ html, body, [class*="css"] {
 
 .block-container {
     max-width: 760px;
-    padding-top: calc(1.8rem + env(safe-area-inset-top));
+    padding-top: calc(5rem + env(safe-area-inset-top));
     padding-bottom: calc(2rem + env(safe-area-inset-bottom));
 }
 
