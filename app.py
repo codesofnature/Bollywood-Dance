@@ -27,7 +27,7 @@ AVAILABLE_PROGRAMS = [
     "weeks": 20,
     "fee": 250.0,
     "stripe_link": "https://buy.stripe.com/6oU00jgpm9IUfJLezI9R603",
-    "poster": "https://images.unsplash.com/photo-1712192682756-ae5b3a8e7508?auto=format&fit=crop&w=800&q=80",
+    "poster": "https://github.com/codesofnature/Bollywood-Dance/blob/main/1.jpg?raw=true",
     "desc": "High-energy entry-level fitness infused with cinematic Bollywood flair.",
     "song_count": "4-5 songs"
   },
@@ -38,7 +38,7 @@ AVAILABLE_PROGRAMS = [
     "weeks": 20,
     "fee": 500.0,
     "stripe_link": "https://buy.stripe.com/00waEX3CA8EQapr1MW9R604",
-    "poster": "https://images.unsplash.com/photo-1563775957285-5860ffa885c0?auto=format&fit=crop&w=800&q=80",
+    "poster": "https://github.com/codesofnature/Bollywood-Dance/blob/main/2.jpg?raw=true",
     "desc": "Level up your stamina with complex beats and faster choreography.",
     "song_count": "4-5 songs"
   },
@@ -49,7 +49,7 @@ AVAILABLE_PROGRAMS = [
     "weeks": 10,
     "fee": 1500.0,
     "stripe_link": "https://buy.stripe.com/3cIbJ15KI08keFH9fo9R605",
-    "poster": "https://images.unsplash.com/photo-1547106510-6aec13ee41ff?auto=format&fit=crop&w=800&q=80",
+    "poster": "https://github.com/codesofnature/Bollywood-Dance/blob/main/3.jpg?raw=true",
     "desc": "Perfect for events/weddings/performances! Master partner choreography with elegance and grace.",
     "song_count": "2-3 songs"
   },
@@ -60,7 +60,7 @@ AVAILABLE_PROGRAMS = [
     "weeks": 10,
     "fee": 1000.0,
     "stripe_link": "https://buy.stripe.com/14A14n7SQ6wI8hj3V49R606",
-    "poster": "https://images.unsplash.com/photo-1563775956525-94c339ff0be7?auto=format&fit=crop&w=800&q=80",
+    "poster": "https://github.com/codesofnature/Bollywood-Dance/blob/main/4.jpg?raw=true",
     "desc": "Coordinate stunning group routines for your next big celebration or event.",
     "song_count": "2-3 songs"
   },
@@ -71,7 +71,7 @@ AVAILABLE_PROGRAMS = [
     "weeks": 12,
     "fee": 500.0,
     "stripe_link": "https://buy.stripe.com/aFa14n6OM4oA1SVfDM9R607",
-    "poster": "https://images.unsplash.com/photo-1650709244890-cc35b30d8036?auto=format&fit=crop&w=800&q=80",
+    "poster": "https://github.com/codesofnature/Bollywood-Dance/blob/main/5.jpg?raw=true",
     "desc": "High energy dance for the youngster techniques for aspiring competitive performers.",
     "song_count": "2-3 songs"
   }
@@ -192,20 +192,6 @@ button[kind="secondary"] {
 }
 
 .bf-muted { color: rgba(253, 251, 247, .7); }
-
-.bf-gallery {
-    display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin: 4px 0 18px;
-}
-.bf-gallery-item {
-    position: relative; aspect-ratio: 1 / 1; border-radius: 14px; overflow: hidden;
-    border: 1px solid rgba(255,255,255,.12);
-}
-.bf-gallery-item img, .bf-gallery-item video {
-    width: 100%; height: 100%; object-fit: cover; display: block;
-}
-@media (min-width: 640px) {
-    .bf-gallery { grid-template-columns: repeat(5, 1fr); }
-}
 
 .bf-card {
     border-radius: 24px; overflow: hidden; border: 1px solid rgba(255, 255, 255, .15);
@@ -388,8 +374,10 @@ if st.session_state.app_state == "home":
 
     st.write("")
 
-    # --- Studio gallery: 5 looping videos + 5 photos, front page only ---
-    # PLACEHOLDER LINKS -- swap these for your own studio photos/clips any time.
+    # --- Studio gallery media links -- kept here as code only (not rendered on
+    # the page). Swap these for your own studio photos/clips any time, then
+    # wire GALLERY_IMAGES / GALLERY_VIDEOS into a section wherever you'd like
+    # them displayed.
     GALLERY_VIDEOS = [
         "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4",
         "https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
@@ -404,15 +392,6 @@ if st.session_state.app_state == "home":
         "https://images.unsplash.com/photo-1598975762861-28118e88154e?auto=format&fit=crop&w=600&q=80",
         "https://images.unsplash.com/photo-1652111132299-ff1056c87b35?auto=format&fit=crop&w=600&q=80",
     ]
-    gallery_tiles = "".join(
-        f'<div class="bf-gallery-item"><video autoplay loop muted playsinline src="{v}"></video></div>'
-        for v in GALLERY_VIDEOS
-    ) + "".join(
-        f'<div class="bf-gallery-item"><img src="{i}" alt="Studio gallery photo"/></div>'
-        for i in GALLERY_IMAGES
-    )
-    st.markdown(f'<div class="bf-gallery">{gallery_tiles}</div>', unsafe_allow_html=True)
-    st.write("")
 
     # --- FAQ knowledge base: fully aware of the studio's actual offered programs ---
     def _fmt_money(v):
