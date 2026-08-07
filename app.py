@@ -11,6 +11,7 @@ import html
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+import filelock
 
 st.set_page_config(
     page_title="BollyFusion Academy",
@@ -81,21 +82,16 @@ DB_FILE = "bollyfusion_db.csv"
 PBKDF2_ITERATIONS = 200_000
 
 def _secure_chmod(path):
-    # Restrict the database file to owner read/write only (best-effort; no-op on platforms
-    # without POSIX perms, e.g. some Windows setups).
     try:
         os.chmod(path, stat.S_IRUSR | stat.S_IWUSR)
     except Exception:
         pass
 
 def generate_secure_password(length=12):
-    # Cryptographically secure random password (uses `secrets`, not `random`, which is not
-    # safe for generating credentials).
     alphabet = "abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789!@#$%"
     return "".join(secrets.choice(alphabet) for _ in range(length))
 
 def hash_password(password, salt=None):
-    # Salted PBKDF2-HMAC-SHA256 hash. Returns (salt_hex, hash_hex). Never store or compare raw passwords.
     if salt is None:
         salt = secrets.token_hex(16)
     digest = hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), bytes.fromhex(salt), PBKDF2_ITERATIONS)
@@ -109,7 +105,6 @@ def verify_password(password, salt, expected_hash):
 
 st.markdown('''
 <style>
-/* Cinematic Bollywood Theme */
 html, body, [class*="css"] {
     font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
@@ -127,215 +122,79 @@ html, body, [class*="css"] {
     max-width: 760px;
     padding-top: calc(1.8rem + env(safe-area-inset-top));
     padding-bottom: calc(2rem + env(safe-area-inset-bottom));
-    padding-left: calc(1rem + env(safe-area-inset-left));
-    padding-right: calc(1rem + env(safe-area-inset-right));
 }
 
-input, textarea, select {
-    font-size: 16px !important;
-}
+input, textarea, select { font-size: 16px !important; }
 
-button {
-    min-height: 50px;
-    border-radius: 16px !important;
-    font-weight: 800 !important;
-}
+button { min-height: 50px; border-radius: 16px !important; font-weight: 800 !important; }
 
 .stButton > button, .stLinkButton > a {
-    width: 100%;
-    padding: 14px 18px;
-    font-size: 16px;
-    text-align: center;
-    border-radius: 16px !important;
-    font-weight: 800 !important;
+    width: 100%; padding: 14px 18px; font-size: 16px; text-align: center;
+    border-radius: 16px !important; font-weight: 800 !important;
 }
 
-/* Primary Button Styling */
 button[kind="primary"], .stLinkButton > a[data-testid="stLinkButton"] {
     background: linear-gradient(90deg, #ff007f, #ffaa00) !important;
-    color: #ffffff !important;
-    border: none !important;
+    color: #ffffff !important; border: none !important;
     box-shadow: 0 4px 15px rgba(255, 0, 127, 0.3);
-    transition: opacity 0.15s ease !important;
 }
 
-button[kind="primary"]:disabled,
-button[kind="primary"][disabled] {
-    background: linear-gradient(90deg, #ff007f, #ffaa00) !important;
-    color: #ffffff !important;
-    opacity: 0.45 !important;
-    box-shadow: none !important;
-    cursor: not-allowed !important;
-}
-/* Secondary Button Styling (The 'Back' button) */
 button[kind="secondary"] {
-    background: rgba(255, 255, 255, 0.05) !important;
-    color: #fdfbf7 !important;
+    background: rgba(255, 255, 255, 0.05) !important; color: #fdfbf7 !important;
     border: 1px solid rgba(255, 255, 255, 0.15) !important;
-    box-shadow: none !important;
-    transition: all 0.2s ease !important;
 }
-
-button[kind="secondary"]:hover,
-button[kind="secondary"]:active,
-button[kind="secondary"]:focus {
-    background: rgba(255, 255, 255, 0.1) !important;
-    border-color: rgba(255, 255, 255, 0.4) !important;
-    color: #ffffff !important;
-}
-#MainMenu { visibility: hidden; }
-footer { visibility: hidden; }
 
 .bf-hero {
-    border-radius: 28px;
-    padding: 32px 20px;
+    border-radius: 28px; padding: 32px 20px;
     border: 1px solid rgba(255, 255, 255, .12);
-    background:
-        linear-gradient(135deg, rgba(255, 0, 127, .2), rgba(255, 170, 0, .15), rgba(138, 43, 226, .15));
-    text-align: center;
-    margin-bottom: 18px;
+    background: linear-gradient(135deg, rgba(255, 0, 127, .2), rgba(255, 170, 0, .15), rgba(138, 43, 226, .15));
+    text-align: center; margin-bottom: 18px;
 }
 
 .bf-pill {
-    display: inline-block;
-    padding: 8px 12px;
-    border-radius: 999px;
-    background: rgba(255, 255, 255, .08);
-    border: 1px solid rgba(255, 255, 255, .12);
-    font-size: 13px;
-    font-weight: 800;
-    margin-bottom: 12px;
+    display: inline-block; padding: 8px 12px; border-radius: 999px;
+    background: rgba(255, 255, 255, .08); border: 1px solid rgba(255, 255, 255, .12);
+    font-size: 13px; font-weight: 800; margin-bottom: 12px;
 }
 
-.bf-hero h1 {
-    margin: 0 0 10px;
-    font-size: clamp(2rem, 5vw, 3.3rem);
-    line-height: 1.04;
-    letter-spacing: -.04em;
-}
+.bf-hero h1 { margin: 0 0 10px; font-size: clamp(2rem, 5vw, 3.3rem); line-height: 1.04; letter-spacing: -.04em; }
 
 .bf-gradient {
     background: linear-gradient(90deg, #ffaa00, #ff007f, #8a2be2);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    color: transparent;
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+
+.media-grid { 
+    display: flex; gap: 10px; overflow-x: auto; padding: 10px 0; margin-top: 15px; 
+    scroll-snap-type: x mandatory;
+}
+.media-grid::-webkit-scrollbar { display: none; }
+.media-grid > * {
+    flex: 0 0 auto; width: 240px; height: 140px; border-radius: 12px; 
+    object-fit: cover; border: 1px solid rgba(255,255,255,0.2); scroll-snap-align: center;
 }
 
 .bf-muted { color: rgba(253, 251, 247, .7); }
-.bf-section-title h2 { margin-bottom: 4px; }
-
 .bf-card {
-    border-radius: 24px;
-    overflow: hidden;
-    border: 1px solid rgba(255, 255, 255, .15);
-    background: rgba(255, 255, 255, .05);
-    margin-bottom: 12px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+    border-radius: 24px; overflow: hidden; border: 1px solid rgba(255, 255, 255, .15);
+    background: rgba(255, 255, 255, .05); margin-bottom: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.4);
 }
-
-.bf-media {
-    position: relative;
-    aspect-ratio: 16 / 10;
-    background: linear-gradient(135deg, rgba(255, 0, 127, .35), rgba(255, 170, 0, .28));
-}
-
-.bf-media img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-}
-
-.bf-overlay {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(to top, rgba(10, 5, 16, .85), transparent 60%);
-}
-
-.bf-badge {
-    position: absolute;
-    top: 12px;
-    left: 12px;
-    padding: 7px 10px;
-    border-radius: 999px;
-    background: rgba(0, 0, 0, .45);
-    border: 1px solid rgba(255, 255, 255, .25);
-    font-size: 12px;
-    font-weight: 800;
-    color: white;
-}
-
-.bf-badge-bottom {
-    top: auto;
-    bottom: 12px;
-    left: auto;
-    right: 12px;
-    background: rgba(255, 170, 0, .25);
-}
-
+.bf-media { position: relative; aspect-ratio: 16 / 10; }
+.bf-media img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.bf-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(10, 5, 16, .85), transparent 60%); }
 .bf-body { padding: 16px; }
-.bf-body h3 { margin: 0 0 10px; font-size: 1.05rem; }
+.bf-price { font-size: 1.25rem; font-weight: 900; color: #00e676; margin-top: 8px; }
 
-.bf-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
-.bf-chip {
-    padding: 7px 9px;
-    border-radius: 999px;
-    background: rgba(255, 255, 255, .08);
-    border: 1px solid rgba(255, 255, 255, .08);
-    font-size: 12px;
-    color: rgba(253, 251, 247, .75);
-}
-
-.bf-price {
-    font-size: 1.25rem;
-    font-weight: 900;
-    color: #00e676;
-    margin-top: 8px;
-}
-
-.bf-summary {
-    display: grid;
-    gap: 12px;
-    padding: 16px;
-    border-radius: 20px;
-    background: rgba(255, 255, 255, .05);
-    border: 1px solid rgba(255, 255, 255, .1);
-    margin-bottom: 18px;
-}
-
-.bf-summary div { display: flex; justify-content: space-between; gap: 12px; }
-
-.bf-id {
-    text-align: center;
-    padding: 20px;
-    border-radius: 24px;
-    background:
-        linear-gradient(135deg, rgba(255, 170, 0, .15), rgba(255, 0, 127, .15), rgba(138, 43, 226, .15));
-    border: 1px solid rgba(255, 255, 255, .15);
-    margin-bottom: 16px;
-}
-
-@media (max-width: 700px) {
-    div[data-baseweb="row"] { flex-direction: column !important; }
-    div[data-baseweb="col"] { width: 100% !important; min-width: 100% !important; }
-    .block-container { padding-left: 12px; padding-right: 12px; }
-}
 </style>
 ''', unsafe_allow_html=True)
 
 if "app_state" not in st.session_state:
     st.session_state.app_state = "home"
-
 if "current_user" not in st.session_state:
-    st.session_state.current_user = {
-        "Name": "", "Email": "", "Program Number": "-", "Class": "-", "Fee": 0.0, "Stripe Link": ""
-    }
-
+    st.session_state.current_user = {"Name": "", "Email": "", "Program Number": "-", "Class": "-", "Fee": 0.0, "Stripe Link": ""}
 if "logged_in_student" not in st.session_state:
     st.session_state.logged_in_student = None
 
-# --- Persistent CSV Database Setup ---
 if "student_db" not in st.session_state:
     if os.path.exists(DB_FILE):
         st.session_state.student_db = pd.read_csv(DB_FILE).to_dict('records')
@@ -343,84 +202,65 @@ if "student_db" not in st.session_state:
     else:
         st.session_state.student_db = []
 
-# Update DB Function that UPSERTS to prevent garbage rows
-# NOTE: `password` param, when provided, is the PLAINTEXT password only for the
-# purpose of hashing it here / emailing it once. It is never written to disk in
-# plaintext -- only the salt + PBKDF2 hash are persisted.
+# Using FileLock for thread-safety and to prevent race conditions during DB updates
 def update_db(name, email, prog_num, class_name, status, password="", fee=0.0):
-    timestamp = datetime.datetime.now().strftime("%Y-%m-%d %I:%M %p")
-    df = pd.DataFrame(st.session_state.student_db)
+    lock = filelock.FileLock(f"{DB_FILE}.lock")
+    with lock:
+        timestamp = datetime.datetime.now().strftime("%Y-%m-%d %I:%M %p")
+        
+        # Fresh read inside lock
+        if os.path.exists(DB_FILE):
+            df = pd.read_csv(DB_FILE)
+        else:
+            df = pd.DataFrame(columns=["Timestamp", "Name", "Email", "Program Number", "Class", "Status", "PasswordSalt", "PasswordHash", "Fee"])
 
-    pw_salt, pw_hash = (None, None)
-    if password:
-        pw_salt, pw_hash = hash_password(password)
+        pw_salt, pw_hash = (None, None)
+        if password:
+            pw_salt, pw_hash = hash_password(password)
 
-    if not df.empty and email and email != "No Details Provided":
-        if email in df['Email'].values:
-            # Update existing user instead of adding garbage rows
-            idx = df.index[df['Email'] == email].tolist()[0]
-            df.at[idx, 'Timestamp'] = timestamp
-            df.at[idx, 'Name'] = name
-            df.at[idx, 'Program Number'] = prog_num
-            df.at[idx, 'Class'] = class_name
-            df.at[idx, 'Status'] = status
-            if pw_hash:
-                df.at[idx, 'PasswordSalt'] = pw_salt
-                df.at[idx, 'PasswordHash'] = pw_hash
-            if fee:
-                df.at[idx, 'Fee'] = fee
+        if not df.empty and email and email != "No Details Provided":
+            if email in df['Email'].values:
+                idx = df.index[df['Email'] == email].tolist()[0]
+                df.at[idx, 'Timestamp'] = timestamp
+                df.at[idx, 'Name'] = name
+                df.at[idx, 'Program Number'] = prog_num
+                df.at[idx, 'Class'] = class_name
+                df.at[idx, 'Status'] = status
+                if pw_hash:
+                    df.at[idx, 'PasswordSalt'] = pw_salt
+                    df.at[idx, 'PasswordHash'] = pw_hash
+                if fee:
+                    df.at[idx, 'Fee'] = fee
                 
-            st.session_state.student_db = df.to_dict('records')
-            df.to_csv(DB_FILE, index=False)
-            _secure_chmod(DB_FILE)
-            return
+                st.session_state.student_db = df.to_dict('records')
+                df.to_csv(DB_FILE, index=False)
+                _secure_chmod(DB_FILE)
+                return
 
-    # Add new record
-    record = {
-        "Timestamp": timestamp,
-        "Name": name,
-        "Email": email,
-        "Program Number": prog_num,
-        "Class": class_name,
-        "Status": status,
-        "PasswordSalt": pw_salt,
-        "PasswordHash": pw_hash,
-        "Fee": fee
-    }
-    st.session_state.student_db.append(record)
-    pd.DataFrame(st.session_state.student_db).to_csv(DB_FILE, index=False)
-    _secure_chmod(DB_FILE)
-# -------------------------------------
+        record = {
+            "Timestamp": timestamp, "Name": name, "Email": email, "Program Number": prog_num,
+            "Class": class_name, "Status": status, "PasswordSalt": pw_salt, "PasswordHash": pw_hash, "Fee": fee
+        }
+        df = pd.concat([df, pd.DataFrame([record])], ignore_index=True)
+        st.session_state.student_db = df.to_dict('records')
+        df.to_csv(DB_FILE, index=False)
+        _secure_chmod(DB_FILE)
 
-# Email function
 def send_email_invoice(to_email, name, class_name, fee, password):
-    # Credentials are read from Streamlit secrets (.streamlit/secrets.toml), never hardcoded
-    # in source. See the secrets.toml file generated alongside this app for the expected keys.
     sender_email = st.secrets.get("smtp_email", "")
     sender_password = st.secrets.get("smtp_app_password", "")
     admin_email = st.secrets.get("admin_notify_email", "")
 
-    if not sender_email or not sender_password:
-        # No SMTP configured -- skip silently rather than fail with an exception in the UI.
-        return
-
+    if not sender_email or not sender_password: return
     subject = "BollyFusion Academy - Payment Invoice & Portal Login"
-    body = (
-        f"Hi {name},\n\n"
-        f"Thank you for your payment of ${fee:.2f} for {class_name}.\n\n"
-        f"Your Registered Student Portal login details are:\n"
-        f"Email: {to_email}\n"
-        f"Password: {password}\n\n"
-        f"Please log in via the website to access your unique QR code for class entry and view this invoice.\n\n"
-        f"Best,\nBollyFusion Academy"
-    )
-    
+    body = (f"Hi {name},\n\nThank you for your payment of ${fee:.2f} for {class_name}.\n\n"
+            f"Your Registered Student Portal login details are:\nEmail: {to_email}\nPassword: {password}\n\n"
+            f"Please log in via the website to access your unique QR code for class entry and view this invoice.\n\nBest,\nBollyFusion Academy")
     try:
         msg = MIMEMultipart()
         msg['From'] = sender_email
         msg['To'] = to_email
-        if admin_email:
-            msg['Bcc'] = admin_email
+        if admin_email: msg['Bcc'] = admin_email
         msg['Subject'] = subject
         msg.attach(MIMEText(body, 'plain'))
         
@@ -431,126 +271,114 @@ def send_email_invoice(to_email, name, class_name, fee, password):
         server.quit()
         st.success("Invoice and portal password emailed successfully.")
     except Exception:
-        # Never surface SMTP internals (server responses, credentials-adjacent errors) to the
-        # end user -- just let them know delivery didn't happen.
         st.warning("Payment was recorded, but the confirmation email could not be sent. Please contact the studio.")
 
-def navigate(to_state):
-    st.session_state.app_state = to_state
-
+def navigate(to_state): st.session_state.app_state = to_state
 def reset_user():
-    st.session_state.current_user = {
-        "Name": "", "Email": "", "Program Number": "-", "Class": "-", "Fee": 0.0, "Stripe Link": ""
-    }
+    st.session_state.current_user = {"Name": "", "Email": "", "Program Number": "-", "Class": "-", "Fee": 0.0, "Stripe Link": ""}
     st.query_params.clear()
     st.session_state.app_state = "home"
 
-# --- Client IP Detection ---
 def get_client_ip():
     try:
         if hasattr(st, 'context') and hasattr(st.context, 'headers'):
             return st.context.headers.get("X-Forwarded-For", "Unknown IP").split(',')[0]
-        from streamlit.web.server.websocket_headers import _get_websocket_headers
-        headers = _get_websocket_headers()
-        if headers and "X-Forwarded-For" in headers:
-            return headers.get("X-Forwarded-For", "Unknown IP").split(',')[0]
-    except Exception:
-        pass
+    except Exception: pass
     return "IP Unavailable"
 
-# --- Dynamic Processing Logic ---
 def process_registration(is_valid):
     if not is_valid:
         ip_addr = get_client_ip()
         update_db(f"Guest ({ip_addr})", "No Details Provided", "-", "Browsing Programs...", "Just Browsing")
     else:
-        update_db(st.session_state.current_user["Name"], 
-                  st.session_state.current_user["Email"], 
-                  "-", "Browsing Programs...", "Entered Details")
+        update_db(st.session_state.current_user["Name"], st.session_state.current_user["Email"], "-", "Browsing Programs...", "Entered Details")
     navigate("classes")
 
-# --- Stripe Success Listener ---
 if "status" in st.query_params and st.query_params["status"] == "success":
     if st.session_state.app_state != "success":
         st.session_state.app_state = "success"
         if st.session_state.current_user.get("Email"):
-            # Generate a cryptographically secure password (secrets module, not random)
             gen_pw = generate_secure_password(12)
-
-            update_db(
-                st.session_state.current_user["Name"],
-                st.session_state.current_user["Email"],
-                st.session_state.current_user["Program Number"],
-                st.session_state.current_user["Class"],
-                "Paid ✅",
-                password=gen_pw,
-                fee=st.session_state.current_user.get("Fee", 0.0)
-            )
-            # Trigger Email
-            send_email_invoice(
-                st.session_state.current_user["Email"],
-                st.session_state.current_user["Name"],
-                st.session_state.current_user["Class"],
-                st.session_state.current_user.get("Fee", 0.0),
-                gen_pw
-            )
-# -------------------------------
+            update_db(st.session_state.current_user["Name"], st.session_state.current_user["Email"], st.session_state.current_user["Program Number"], st.session_state.current_user["Class"], "Paid ✅", password=gen_pw, fee=st.session_state.current_user.get("Fee", 0.0))
+            send_email_invoice(st.session_state.current_user["Email"], st.session_state.current_user["Name"], st.session_state.current_user["Class"], st.session_state.current_user.get("Fee", 0.0), gen_pw)
 
 
 if st.session_state.app_state == "home":
+    # Splash UI containing 5 placeholder components (3 Imgs, 2 Vids) 
     st.markdown('''
     <div class="bf-hero">
         <div class="bf-pill">🎬 Bollywood Dance Studio</div>
         <h1>Master Cinematic Dance on Any Stage, <span class="bf-gradient">built for every stage</span></h1>
-        <p class="bf-muted">
-            Choose, Register, Pay            
-        </p>
+        <p class="bf-muted">Choose, Register, Pay</p>
+        <div class="media-grid">
+            <img src="https://images.unsplash.com/photo-1543857778-c4a1a3e0b2eb?auto=format&fit=crop&w=400&q=80" alt="Image 1"/>
+            <video autoplay loop muted playsinline src="https://www.w3schools.com/html/mov_bbb.mp4"></video>
+            <img src="https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=400&q=80" alt="Image 2"/>
+            <video autoplay loop muted playsinline src="https://www.w3schools.com/html/mov_bbb.mp4"></video>
+            <img src="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=400&q=80" alt="Image 3"/>
+        </div>
     </div>
     ''', unsafe_allow_html=True)
 
     st.write("")
 
     col1, col2, col3 = st.columns(3)
-    with col1:
-        st.button("Browse Program Options", use_container_width=True, type="primary", on_click=navigate, args=("register",))
-    with col2:
-        st.button("Registered Student Portal", use_container_width=True, on_click=navigate, args=("student_login",))
-    with col3:
-        st.button("Teacher Portal", use_container_width=True, on_click=navigate, args=("admin_login",))
+    with col1: st.button("Browse Program Options", use_container_width=True, type="primary", on_click=navigate, args=("register",))
+    with col2: st.button("Registered Student Portal", use_container_width=True, on_click=navigate, args=("student_login",))
+    with col3: st.button("Teacher Portal", use_container_width=True, on_click=navigate, args=("admin_login",))
+    
+    st.divider()
+    
+    # Splash Screen Chatbot logic
+    st.markdown("### 💬 Chat with us")
+    
+    if "chat_history" not in st.session_state:
+        st.session_state.chat_history = [{"role": "assistant", "content": "Hi! Do you have any questions about our programs, schedules, or pricing?"}]
+    if "chat_failed_attempts" not in st.session_state:
+        st.session_state.chat_failed_attempts = 0
 
+    for msg in st.session_state.chat_history:
+        st.chat_message(msg["role"]).write(msg["content"])
+
+    prompt = st.chat_input("Ask a question...")
+    if prompt:
+        st.session_state.chat_history.append({"role": "user", "content": prompt})
+        prompt_lower = prompt.lower()
+        
+        # Prepopulated logic
+        if any(word in prompt_lower for word in ["price", "cost", "fee", "how much"]):
+            answer = "Our classes range based on the level and duration. Tap 'Browse Program Options' above for full pricing details!"
+        elif any(word in prompt_lower for word in ["schedule", "time", "when", "days"]):
+            answer = "Schedules vary by program. Please browse our program options to see specific class dates and hours."
+        elif any(word in prompt_lower for word in ["location", "where", "studio"]):
+            answer = "We are located at the Main Studio. Registered students receive exact access/entry details upon checkout."
+        else:
+            st.session_state.chat_failed_attempts += 1
+            if st.session_state.chat_failed_attempts >= 3:
+                answer = "I'm sorry, I couldn't find a good answer to your recent questions. **Please contact our support at 2341239239** for immediate assistance."
+            else:
+                answer = "I'm not quite sure about that. Could you ask something else regarding prices, schedule, or location?"
+                
+        st.session_state.chat_history.append({"role": "assistant", "content": answer})
+        st.rerun()
 
 elif st.session_state.app_state == "register":
-    st.markdown(
-        '<div class="bf-section-title"><h2>BROWSE PROGRAM OPTIONS AND PRICES</h2>'
-        '<p class="bf-muted">Enter your details, or simply browse.</p></div>',
-        unsafe_allow_html=True
-    )
-
+    st.markdown('<div class="bf-section-title"><h2>BROWSE PROGRAM OPTIONS AND PRICES</h2><p class="bf-muted">Enter your details, or simply browse.</p></div>', unsafe_allow_html=True)
     st.session_state.current_user["Name"] = st.text_input("Full Name", value=st.session_state.current_user.get("Name", ""), placeholder="What do we call you?")
-    st.session_state.current_user["Email"] = st.text_input("Email", value=st.session_state.current_user.get("Email and / or Phone", ""), placeholder=".com .edu email ID")
-
+    st.session_state.current_user["Email"] = st.text_input("Email", value=st.session_state.current_user.get("Email", ""), placeholder=".com .edu email ID")
     st.write("")
-
     email_pattern = r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"
     is_valid_email = bool(re.match(email_pattern, st.session_state.current_user["Email"]))
-    
     valid = (st.session_state.current_user["Name"].strip() != "" and is_valid_email)
 
     col1, col2 = st.columns(2)
-    with col1:
-        st.button("Back", use_container_width=True, on_click=navigate, args=("home",))
+    with col1: st.button("Back", use_container_width=True, on_click=navigate, args=("home",))
     with col2:
         btn_label = "Continue" if valid else "I'll just browse"
         st.button(btn_label, use_container_width=True, type="primary", on_click=process_registration, args=(valid,))
 
-
 elif st.session_state.app_state == "classes":
-    st.markdown(
-        '<div class="bf-section-title"><h2>Choose a Program</h2>'
-        '<p class="bf-muted">Tap a program to continue to secure checkout.</p></div>',
-        unsafe_allow_html=True
-    )
-
+    st.markdown('<div class="bf-section-title"><h2>Choose a Program</h2><p class="bf-muted">Tap a program to continue to secure checkout.</p></div>', unsafe_allow_html=True)
     if not AVAILABLE_PROGRAMS:
         st.info("No programs are currently available.")
     else:
@@ -560,366 +388,77 @@ elif st.session_state.app_state == "classes":
                 st.markdown(f'''
                 <div class="bf-card">
                     <div class="bf-media">
-                        <img src="{prog['poster']}" alt="{prog['name']}" onerror="this.style.display='none'">
+                        <img src="{prog['poster']}" alt="{prog['name']}">
                         <div class="bf-overlay"></div>
                         <div class="bf-badge">{prog['weeks']} Weeks</div>
-                        <div class="bf-badge bf-badge-bottom">{prog['song_count']}</div>
                     </div>
                     <div class="bf-body">
                         <h3>{prog['name']}</h3>
-                        <div class="bf-chips">
-                            <span class="bf-chip">💃 {prog['hours']} hrs/wk</span>
-                            <span class="bf-chip">🗓 {prog['weeks']} weeks</span>
-                            <span class="bf-chip">🎵 {prog['song_count']}</span>
-                        </div>
-                        <p class="bf-muted">{prog['desc']}</p>
                         <div class="bf-price">${prog['fee']:,.2f}</div>
                     </div>
                 </div>
                 ''', unsafe_allow_html=True)
-
                 if st.button(f"Select {prog['name']}", key=f"select_{prog['id']}", use_container_width=True, type="primary"):
                     st.session_state.current_user["Class"] = prog["name"]
                     st.session_state.current_user["Program Number"] = prog["id"]
                     st.session_state.current_user["Fee"] = prog["fee"]
                     st.session_state.current_user["Stripe Link"] = prog["stripe_link"]
-                    
-                    update_db(st.session_state.current_user.get("Name", "Guest"), 
-                              st.session_state.current_user.get("Email", "None"), 
-                              prog["id"], prog["name"], "Pending Payment")
-
+                    update_db(st.session_state.current_user.get("Name", "Guest"), st.session_state.current_user.get("Email", "None"), prog["id"], prog["name"], "Pending Payment")
                     navigate("checkout")
-
     st.write("")
     st.button("Back", use_container_width=True, on_click=navigate, args=("register",))
 
-
 elif st.session_state.app_state == "checkout":
-    st.markdown(
-        '<div class="bf-section-title"><h2>Secure Checkout</h2>'
-        '<p class="bf-muted">Review your program and accept all legal terms.</p></div>',
-        unsafe_allow_html=True
-    )
-
-    selected_class = st.session_state.current_user.get("Class", "")
-    selected_fee = st.session_state.current_user.get("Fee", 0)
-    
-    stripe_link = st.session_state.current_user.get("Stripe Link", "#")
-    checkout_url = f"{stripe_link}?prefilled_email={urllib.parse.quote(st.session_state.current_user.get('Email', ''))}"
-
-    # Escape user-supplied values before embedding in raw HTML to prevent stored/reflected XSS
-    safe_class = html.escape(str(selected_class))
-    safe_name = html.escape(str(st.session_state.current_user.get("Name", "Guest")))
-
-    st.markdown(f'''
-    <div class="bf-summary">
-        <div>
-            <span class="bf-muted">Program</span>
-            <strong>{safe_class}</strong>
-        </div>
-        <div>
-            <span class="bf-muted">Student</span>
-            <strong>{safe_name}</strong>
-        </div>
-        <div>
-            <span class="bf-muted">Amount Due</span>
-            <strong class="bf-price">${selected_fee:,.2f}</strong>
-        </div>
-    </div>
-    ''', unsafe_allow_html=True)
-
-    st.markdown("### Legal Agreements")
-
-    cb1 = st.checkbox("I agree to the Physical Activity & Liability Waiver")
-    cb2 = st.checkbox("I agree to the Media & Photography Release")
-
+    selected_class, selected_fee = st.session_state.current_user.get("Class", ""), st.session_state.current_user.get("Fee", 0)
+    checkout_url = f"{st.session_state.current_user.get('Stripe Link', '#')}?prefilled_email={urllib.parse.quote(st.session_state.current_user.get('Email', ''))}"
+    st.markdown(f"### Amount Due: **${selected_fee:,.2f}**")
+    cb1 = st.checkbox("I agree to the Liability Waiver")
+    cb2 = st.checkbox("I agree to the Media Release")
     st.write("")
-
     col1, col2 = st.columns(2)
-    with col1:
-        st.button("Back", use_container_width=True, on_click=navigate, args=("classes",))
-
+    with col1: st.button("Back", use_container_width=True, on_click=navigate, args=("classes",))
     with col2:
-        can_pay = cb1 and cb2
-
-        if can_pay:
-            st.link_button(
-                f"💳 Pay ${selected_fee:,.2f} via Stripe",
-                url=checkout_url,
-                use_container_width=True,
-                type="primary"
-            )
-        else:
-            st.button(
-                f"💳 Pay ${selected_fee:,.2f} via Stripe",
-                use_container_width=True,
-                type="primary",
-                disabled=True
-            )
-
+        if cb1 and cb2: st.link_button(f"💳 Pay via Stripe", url=checkout_url, use_container_width=True, type="primary")
+        else: st.button(f"💳 Pay via Stripe", use_container_width=True, type="primary", disabled=True)
 
 elif st.session_state.app_state == "success":
-    st.markdown(
-        '<div class="bf-section-title"><h2>Digital Studio ID & Registration Confirmed</h2>'
-        '<p class="bf-muted">Your invoice and portal password have been emailed to you.</p></div>',
-        unsafe_allow_html=True
-    )
-
-    u_name = st.session_state.current_user.get("Name", "Guest")
-    u_class = st.session_state.current_user.get("Class", "")
-
-    qr_data = urllib.parse.quote(f"Student:{u_name}|Class:{u_class}")
-    qr_url = f"https://api.qrserver.com/v1/create-qr-code/?size=300x300&data={qr_data}"
-
-    safe_u_name = html.escape(str(u_name))
-    safe_u_class = html.escape(str(u_class))
-
-    st.markdown(f'''
-    <div class="bf-id">
-        <div class="bf-pill">✅ Payment Successful</div>
-        <h2>{safe_u_name}</h2>
-        <p class="bf-muted">{safe_u_class}</p>
-    </div>
-    ''', unsafe_allow_html=True)
-
-    st.image(qr_url, use_container_width=True)
-
-    st.write("")
+    st.markdown("### Payment Successful!")
     st.button("Done (Back to Home)", use_container_width=True, type="primary", on_click=reset_user)
 
-# --- NEW: Student Login & Dashboard ---
 elif st.session_state.app_state == "student_login":
-    st.markdown(
-        '<div class="bf-section-title"><h2>🎓 Registered Student Portal</h2>'
-        '<p class="bf-muted">Login using the email and password sent in your payment invoice.</p></div>',
-        unsafe_allow_html=True
-    )
-
-    # --- Basic brute-force lockout ---
-    if "student_login_attempts" not in st.session_state:
-        st.session_state.student_login_attempts = 0
-    if "student_login_locked_until" not in st.session_state:
-        st.session_state.student_login_locked_until = None
-
-    now = datetime.datetime.now()
-    locked = (st.session_state.student_login_locked_until is not None
-              and now < st.session_state.student_login_locked_until)
-
-    if locked:
-        wait_secs = int((st.session_state.student_login_locked_until - now).total_seconds())
-        st.error(f"Too many failed attempts. Please try again in {wait_secs} seconds.")
-
-    s_email = st.text_input("Registered Email", disabled=locked)
-    s_pass = st.text_input("Password", type="password", disabled=locked)
-
-    st.write("")
+    s_email = st.text_input("Registered Email")
+    s_pass = st.text_input("Password", type="password")
     col1, col2 = st.columns(2)
-    with col1:
-        st.button("Cancel", use_container_width=True, on_click=navigate, args=("home",))
+    with col1: st.button("Cancel", use_container_width=True, on_click=navigate, args=("home",))
     with col2:
-        if st.button("Login", use_container_width=True, type="primary", disabled=locked):
+        if st.button("Login", use_container_width=True, type="primary"):
             df = pd.DataFrame(st.session_state.student_db)
-            success = False
-            if not df.empty and s_email and s_email in df['Email'].values:
+            if not df.empty and s_email in df['Email'].values:
                 user_row = df[df['Email'] == s_email].iloc[0]
-                if s_pass and verify_password(s_pass, user_row.get('PasswordSalt', ''), user_row.get('PasswordHash', '')):
-                    success = True
-
-            if success:
-                st.session_state.logged_in_student = user_row.to_dict()
-                st.session_state.student_login_attempts = 0
-                st.session_state.student_login_locked_until = None
-                navigate("student_dashboard")
-            else:
-                # Deliberately generic message -- do not reveal whether the email exists,
-                # which would let an attacker enumerate registered students.
-                st.session_state.student_login_attempts += 1
-                if st.session_state.student_login_attempts >= 5:
-                    st.session_state.student_login_locked_until = now + datetime.timedelta(minutes=5)
-                    st.session_state.student_login_attempts = 0
-                st.error("Invalid email or password.")
+                if verify_password(s_pass, user_row.get('PasswordSalt', ''), user_row.get('PasswordHash', '')):
+                    st.session_state.logged_in_student = user_row.to_dict()
+                    navigate("student_dashboard")
+                else: st.error("Invalid credentials.")
+            else: st.error("Invalid credentials.")
 
 elif st.session_state.app_state == "student_dashboard":
-    u_data = st.session_state.logged_in_student
-
-    # Escape every user-controlled field before it goes into raw HTML (unsafe_allow_html)
-    safe_name = html.escape(str(u_data.get("Name", "Student")))
-    safe_class = html.escape(str(u_data.get("Class", "Dance Class")))
-    safe_timestamp = html.escape(str(u_data.get("Timestamp", "N/A")))
-    safe_email = html.escape(str(u_data.get("Email", "N/A")))
-    safe_status = html.escape(str(u_data.get("Status", "N/A")))
-
-    st.markdown(
-        f'<div class="bf-section-title"><h2>Welcome back, {safe_name}!</h2>'
-        '<p class="bf-muted">Here are your class details and invoice.</p></div>',
-        unsafe_allow_html=True
-    )
-
-    tab1, tab2 = st.tabs(["QR Code Entry ID", "My Invoice"])
-    
-    with tab1:
-        st.markdown("### Class Entry QR Code")
-        st.info(f"Show this to the instructor for **{safe_class}**.")
-        qr_data = urllib.parse.quote(f"Student:{u_data.get('Name')}|Class:{u_data.get('Class')}")
-        qr_url = f"https://api.qrserver.com/v1/create-qr-code/?size=300x300&data={qr_data}"
-        st.image(qr_url)
-        
-    with tab2:
-        st.markdown("### Payment Invoice")
-        st.markdown(f'''
-        <div class="bf-summary">
-            <div><span class="bf-muted">Date</span><strong>{safe_timestamp}</strong></div>
-            <div><span class="bf-muted">Student Name</span><strong>{safe_name}</strong></div>
-            <div><span class="bf-muted">Email</span><strong>{safe_email}</strong></div>
-            <div><span class="bf-muted">Service/Class</span><strong>{safe_class}</strong></div>
-            <div><span class="bf-muted">Status</span><strong>{safe_status}</strong></div>
-            <div><span class="bf-muted">Total Paid</span><strong class="bf-price">${float(u_data.get("Fee", 0)):,.2f}</strong></div>
-        </div>
-        ''', unsafe_allow_html=True)
-        
-    st.write("")
+    st.write("Welcome to your dashboard!")
     if st.button("Logout", use_container_width=True):
         st.session_state.logged_in_student = None
         navigate("home")
 
-# --- MODIFIED: Admin Login & Dashboard ---
 elif st.session_state.app_state == "admin_login":
-    st.markdown(
-        '<div class="bf-section-title"><h2>🔒 Admin Login</h2>'
-        '<p class="bf-muted">Enter your studio admin credentials.</p></div>',
-        unsafe_allow_html=True
-    )
-
-    admin_user_configured = st.secrets.get("admin_username", "")
-    admin_pass_configured = st.secrets.get("admin_password", "")
-
-    if not admin_user_configured or not admin_pass_configured:
-        st.error("Admin login is not configured. Set `admin_username` and `admin_password` in `.streamlit/secrets.toml`.")
-
-    if "admin_login_attempts" not in st.session_state:
-        st.session_state.admin_login_attempts = 0
-    if "admin_login_locked_until" not in st.session_state:
-        st.session_state.admin_login_locked_until = None
-
-    now = datetime.datetime.now()
-    locked = (st.session_state.admin_login_locked_until is not None
-              and now < st.session_state.admin_login_locked_until)
-    if locked:
-        wait_secs = int((st.session_state.admin_login_locked_until - now).total_seconds())
-        st.error(f"Too many failed attempts. Please try again in {wait_secs} seconds.")
-
-    disabled = locked or not admin_user_configured or not admin_pass_configured
-    a_user = st.text_input("Username", disabled=disabled)
-    a_pass = st.text_input("Password", type="password", disabled=disabled)
-
-    st.write("")
-
+    a_user = st.text_input("Username")
+    a_pass = st.text_input("Password", type="password")
     col1, col2 = st.columns(2)
-    with col1:
-        st.button("Cancel", use_container_width=True, on_click=navigate, args=("home",))
+    with col1: st.button("Cancel", use_container_width=True, on_click=navigate, args=("home",))
     with col2:
-        if st.button("Login", use_container_width=True, type="primary", disabled=disabled):
-            user_ok = secrets.compare_digest(a_user, admin_user_configured)
-            pass_ok = secrets.compare_digest(a_pass, admin_pass_configured)
-            if user_ok and pass_ok:
-                st.session_state.admin_login_attempts = 0
-                st.session_state.admin_login_locked_until = None
+        if st.button("Login", use_container_width=True, type="primary"):
+            if secrets.compare_digest(a_user, st.secrets.get("admin_username", "")) and secrets.compare_digest(a_pass, st.secrets.get("admin_password", "")):
                 navigate("admin_dashboard")
-            else:
-                st.session_state.admin_login_attempts += 1
-                if st.session_state.admin_login_attempts >= 5:
-                    st.session_state.admin_login_locked_until = now + datetime.timedelta(minutes=5)
-                    st.session_state.admin_login_attempts = 0
-                st.error("Invalid credentials.")
-
+            else: st.error("Invalid credentials.")
 
 elif st.session_state.app_state == "admin_dashboard":
-    st.markdown(
-        '<div class="bf-section-title"><h2>📊 Teacher Admin Portal</h2>'
-        '<p class="bf-muted">Select rows and hit delete (or use the trash icon) to remove garbage entries. Hit save to lock changes.</p></div>',
-        unsafe_allow_html=True
-    )
-
-    # --- Restore from Backup CSV ---
-    # bollyfusion_db.csv is intentionally gitignored (it can hold student data), which means
-    # a redeploy/reset that re-clones the repo wipes it. This lets a teacher re-upload a CSV
-    # they previously grabbed with "Download CSV" below to bring everything back.
-    with st.expander("🔄 Restore Database from Backup CSV", expanded=not st.session_state.student_db):
-        st.caption(
-            "If the app's storage got reset (e.g. after a redeploy) and the roster below is empty "
-            "or missing recent students, upload a CSV you previously downloaded from this page "
-            "(or the raw `bollyfusion_db.csv`) to restore it."
-        )
-        restore_file = st.file_uploader("Upload backup CSV", type=["csv"], key="restore_csv_uploader")
-        if restore_file is not None:
-            try:
-                restore_df = pd.read_csv(restore_file)
-            except Exception as e:
-                restore_df = None
-                st.error(f"Couldn't read that CSV: {e}")
-
-            if restore_df is not None:
-                required_cols = {"Name", "Email", "Class", "Status"}
-                missing_cols = required_cols - set(restore_df.columns)
-                if missing_cols:
-                    st.error(
-                        "This doesn't look like a BollyFusion roster CSV -- missing column(s): "
-                        + ", ".join(sorted(missing_cols))
-                    )
-                else:
-                    st.success(f"Found {len(restore_df)} record(s) in the uploaded file.")
-                    restore_mode = st.radio(
-                        "How should this be applied?",
-                        ["Replace current database", "Merge with current database (upsert by Email)"],
-                        key="restore_mode",
-                        horizontal=True
-                    )
-                    if st.button("✅ Confirm Restore", type="primary", key="confirm_restore_btn"):
-                        if restore_mode.startswith("Replace") or not st.session_state.student_db:
-                            new_records = restore_df.to_dict('records')
-                        else:
-                            existing_df = pd.DataFrame(st.session_state.student_db)
-                            combined = pd.concat([existing_df, restore_df], ignore_index=True)
-                            combined = combined.drop_duplicates(subset='Email', keep='last')
-                            new_records = combined.to_dict('records')
-
-                        st.session_state.student_db = new_records
-                        pd.DataFrame(new_records).to_csv(DB_FILE, index=False)
-                        _secure_chmod(DB_FILE)
-                        st.success(f"Restored {len(new_records)} student record(s) from backup.")
-                        st.rerun()
-
-    if os.path.exists(DB_FILE) and st.session_state.student_db:
-        df = pd.DataFrame(st.session_state.student_db)
-        
-        # Add dynamic QR Link and Invoice String for Admin View
-        if 'Name' in df.columns and 'Class' in df.columns:
-            df['Admin_QR_Link'] = df.apply(
-                lambda row: f"https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=Student:{urllib.parse.quote(str(row['Name']))}|Class:{urllib.parse.quote(str(row['Class']))}", 
-                axis=1
-            )
-        
-        # Editable dataframe that allows row deletion. Password hash/salt columns are stored
-        # as non-reversible PBKDF2 output (never plaintext) but are still locked read-only here
-        # so an admin can't accidentally overwrite them with garbage via the editor.
-        column_config = {}
-        if 'PasswordHash' in df.columns:
-            column_config['PasswordHash'] = st.column_config.TextColumn("PasswordHash", disabled=True)
-        if 'PasswordSalt' in df.columns:
-            column_config['PasswordSalt'] = st.column_config.TextColumn("PasswordSalt", disabled=True)
-
-        edited_df = st.data_editor(df, num_rows="dynamic", use_container_width=True, hide_index=True, column_config=column_config)
-        
-        if st.button("💾 Save Database Changes", type="primary"):
-            st.session_state.student_db = edited_df.to_dict('records')
-            edited_df.to_csv(DB_FILE, index=False)
-            _secure_chmod(DB_FILE)
-            st.success("Database changes saved successfully!")
-
-        csv = edited_df.to_csv(index=False).encode("utf-8")
-        st.download_button("Download CSV", data=csv, file_name="bollyfusion-registrations.csv", mime="text/csv", key="download_roster_csv")
-    else:
-        st.info("No students have registered yet during this session.")
-
-    st.write("")
-    st.button("Logout", use_container_width=True, on_click=navigate, args=("home",))
+    if st.session_state.student_db:
+        st.data_editor(pd.DataFrame(st.session_state.student_db))
+    if st.button("Logout", use_container_width=True, on_click=navigate, args=("home",)): pass
