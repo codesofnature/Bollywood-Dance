@@ -256,13 +256,21 @@ div.st-key-bf_fab button {
 }
 
 div.st-key-bf_chat_panel {
-    position: fixed; right: 20px; bottom: 92px; z-index: 999999;
-    width: min(360px, calc(100vw - 40px)); max-height: 70vh;
-    background: #140a20; border: 1px solid rgba(255,255,255,.18); border-radius: 20px;
-    box-shadow: 0 20px 60px rgba(0,0,0,.6); padding: 14px 14px 8px;
-    overflow-y: auto;
+    position: fixed !important; right: 20px !important; bottom: 92px !important; z-index: 999999 !important;
+    width: min(360px, calc(100vw - 40px)) !important; max-height: 70vh !important;
+    background: #140a20 !important; border: 1px solid rgba(255,255,255,.25) !important; border-radius: 20px !important;
+    box-shadow: 0 20px 60px rgba(0,0,0,.8) !important; padding: 16px !important;
+    overflow-y: auto !important;
 }
-div.st-key-bf_chat_panel div[data-testid="stChatMessage"] { padding: 6px 0; }
+
+/* Force chat bubbles to have a slightly lighter background so they contrast against the panel */
+div.st-key-bf_chat_panel div[data-testid="stChatMessage"] { 
+    padding: 12px !important; 
+    background: rgba(255, 255, 255, 0.08) !important; 
+    border-radius: 12px !important;
+    margin-bottom: 8px !important;
+    color: #fdfbf7 !important;
+}
 
 </style>
 ''', unsafe_allow_html=True)
