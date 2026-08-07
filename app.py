@@ -624,7 +624,12 @@ if st.session_state.app_state == "home":
         with st.container(key="bf_chat_panel"):
             st.markdown("**💬 Chat with BollyFusion**")
             for msg in st.session_state.chat_history:
-                st.chat_message(msg["role"]).write(msg["content"])
+                align_class = "user" if msg["role"] == "user" else "bot"
+                st.markdown(f'''
+                    <div class="bf-chat-row {align_class}">
+                        <div class="bf-chat-bubble">{msg["content"]}</div>
+                    </div>
+                ''', unsafe_allow_html=True)
 
             prompt = st.chat_input("Ask about programs, pricing, schedule...")
             if prompt:
