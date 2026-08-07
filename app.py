@@ -131,6 +131,7 @@ button { min-height: 50px; border-radius: 16px !important; font-weight: 800 !imp
 .stButton > button, .stLinkButton > a {
     width: 100%; padding: 14px 18px; font-size: 16px; text-align: center;
     border-radius: 16px !important; font-weight: 800 !important;
+    height: auto !important; 
 }
 
 button[kind="primary"], .stLinkButton > a[data-testid="stLinkButton"] {
