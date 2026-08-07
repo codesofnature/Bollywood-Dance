@@ -4,6 +4,11 @@ import pandas as pd
 import re
 import os
 import datetime
+import random
+import string
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 st.set_page_config(
     page_title="BollyFusion Academy",
@@ -295,6 +300,9 @@ if "current_user" not in st.session_state:
         "Name": "", "Email": "", "Program Number": "-", "Class": "-", "Fee": 0.0, "Stripe Link": ""
     }
 
+if "logged_in_student" not in st.session_state:
+    st.session_state.logged_in_student = None
+
 # --- Persistent CSV Database Setup ---
 if "student_db" not in st.session_state:
     if os.path.exists(DB_FILE):
@@ -302,18 +310,79 @@ if "student_db" not in st.session_state:
     else:
         st.session_state.student_db = []
 
-def update_db(name, email, prog_num, class_name, status):
+# Update DB Function that UPSERTS to prevent garbage rows
+def update_db(name, email, prog_num, class_name, status, password="", fee=0.0):
+    timestamp = datetime.datetime.now().strftime("%Y-%m-%d %I:%M %p")
+    df = pd.DataFrame(st.session_state.student_db)
+    
+    if not df.empty and email and email != "No Details Provided":
+        if email in df['Email'].values:
+            # Update existing user instead of adding garbage rows
+            idx = df.index[df['Email'] == email].tolist()[0]
+            df.at[idx, 'Timestamp'] = timestamp
+            df.at[idx, 'Name'] = name
+            df.at[idx, 'Program Number'] = prog_num
+            df.at[idx, 'Class'] = class_name
+            df.at[idx, 'Status'] = status
+            if password:
+                df.at[idx, 'Password'] = password
+            if fee:
+                df.at[idx, 'Fee'] = fee
+                
+            st.session_state.student_db = df.to_dict('records')
+            df.to_csv(DB_FILE, index=False)
+            return
+
+    # Add new record
     record = {
-        "Timestamp": datetime.datetime.now().strftime("%Y-%m-%d %I:%M %p"),
+        "Timestamp": timestamp,
         "Name": name,
         "Email": email,
         "Program Number": prog_num,
         "Class": class_name,
-        "Status": status
+        "Status": status,
+        "Password": password,
+        "Fee": fee
     }
     st.session_state.student_db.append(record)
     pd.DataFrame(st.session_state.student_db).to_csv(DB_FILE, index=False)
 # -------------------------------------
+
+# Email function
+def send_email_invoice(to_email, name, class_name, fee, password):
+    # TO MAKE THIS WORK: Enter your real Gmail & App Password here.
+    sender_email = "YOUR_GMAIL_HERE@gmail.com"
+    sender_password = "YOUR_APP_PASSWORD_HERE"
+    admin_email = "uday77@gmail.com"
+    
+    subject = "BollyFusion Academy - Payment Invoice & Portal Login"
+    body = (
+        f"Hi {name},\n\n"
+        f"Thank you for your payment of ${fee:.2f} for {class_name}.\n\n"
+        f"Your Registered Student Portal login details are:\n"
+        f"Email: {to_email}\n"
+        f"Password: {password}\n\n"
+        f"Please log in via the website to access your unique QR code for class entry and view this invoice.\n\n"
+        f"Best,\nBollyFusion Academy"
+    )
+    
+    try:
+        msg = MIMEMultipart()
+        msg['From'] = sender_email
+        msg['To'] = to_email
+        msg['Bcc'] = admin_email
+        msg['Subject'] = subject
+        msg.attach(MIMEText(body, 'plain'))
+        
+        server = smtplib.SMTP('smtp.gmail.com', 587)
+        server.starttls()
+        server.login(sender_email, sender_password)
+        server.send_message(msg)
+        server.quit()
+        st.success(f"Invoice and Portal Password emailed successfully to {to_email} and {admin_email}.")
+    except Exception as e:
+        # Fails silently for the user so it doesn't crash the app if no SMTP config is present
+        pass
 
 def navigate(to_state):
     st.session_state.app_state = to_state
@@ -354,11 +423,26 @@ if "status" in st.query_params and st.query_params["status"] == "success":
     if st.session_state.app_state != "success":
         st.session_state.app_state = "success"
         if st.session_state.current_user.get("Email"):
-            update_db(st.session_state.current_user["Name"],
-                      st.session_state.current_user["Email"],
-                      st.session_state.current_user["Program Number"],
-                      st.session_state.current_user["Class"],
-                      "Paid ✅")
+            # Generate random 6 character password
+            gen_pw = "".join(random.choices(string.ascii_letters + string.digits, k=6))
+            
+            update_db(
+                st.session_state.current_user["Name"],
+                st.session_state.current_user["Email"],
+                st.session_state.current_user["Program Number"],
+                st.session_state.current_user["Class"],
+                "Paid ✅",
+                password=gen_pw,
+                fee=st.session_state.current_user.get("Fee", 0.0)
+            )
+            # Trigger Email
+            send_email_invoice(
+                st.session_state.current_user["Email"],
+                st.session_state.current_user["Name"],
+                st.session_state.current_user["Class"],
+                st.session_state.current_user.get("Fee", 0.0),
+                gen_pw
+            )
 # -------------------------------
 
 
@@ -375,11 +459,13 @@ if st.session_state.app_state == "home":
 
     st.write("")
 
-    col1, col2 = st.columns(2)
+    col1, col2, col3 = st.columns(3)
     with col1:
         st.button("Browse Program Options", use_container_width=True, type="primary", on_click=navigate, args=("register",))
     with col2:
-        st.button("Dance Instructor Login", use_container_width=True, on_click=navigate, args=("admin_login",))
+        st.button("Registered Student Portal", use_container_width=True, on_click=navigate, args=("student_login",))
+    with col3:
+        st.button("Teacher Portal", use_container_width=True, on_click=navigate, args=("admin_login",))
 
 
 elif st.session_state.app_state == "register":
@@ -467,7 +553,6 @@ elif st.session_state.app_state == "checkout":
     selected_class = st.session_state.current_user.get("Class", "")
     selected_fee = st.session_state.current_user.get("Fee", 0)
     
-    # Pre-fill user email in Stripe checkout automatically
     stripe_link = st.session_state.current_user.get("Stripe Link", "#")
     checkout_url = f"{stripe_link}?prefilled_email={urllib.parse.quote(st.session_state.current_user.get('Email', ''))}"
 
@@ -491,10 +576,7 @@ elif st.session_state.app_state == "checkout":
     st.markdown("### Legal Agreements")
 
     cb1 = st.checkbox("I agree to the Physical Activity & Liability Waiver")
-    st.caption("I acknowledge that dance involves physical exertion and risk of injury. I assume all risks and release BollyFusion Academy from liability.")
-
     cb2 = st.checkbox("I agree to the Media & Photography Release")
-    st.caption("I grant BollyFusion Academy permission to use photographs and video recordings of me for studio-related promotional purposes.")
 
     st.write("")
 
@@ -503,7 +585,7 @@ elif st.session_state.app_state == "checkout":
         st.button("Back", use_container_width=True, on_click=navigate, args=("classes",))
 
     with col2:
-        can_pay = cb1 and cb2 and cb3
+        can_pay = cb1 and cb2
 
         if can_pay:
             st.link_button(
@@ -523,8 +605,8 @@ elif st.session_state.app_state == "checkout":
 
 elif st.session_state.app_state == "success":
     st.markdown(
-        '<div class="bf-section-title"><h2>Digital Studio ID</h2>'
-        '<p class="bf-muted">Save this QR code for front-desk check-in.</p></div>',
+        '<div class="bf-section-title"><h2>Digital Studio ID & Registration Confirmed</h2>'
+        '<p class="bf-muted">Your invoice and portal password have been emailed to you.</p></div>',
         unsafe_allow_html=True
     )
 
@@ -545,10 +627,73 @@ elif st.session_state.app_state == "success":
     st.image(qr_url, use_container_width=True)
 
     st.write("")
-
     st.button("Done (Back to Home)", use_container_width=True, type="primary", on_click=reset_user)
 
+# --- NEW: Student Login & Dashboard ---
+elif st.session_state.app_state == "student_login":
+    st.markdown(
+        '<div class="bf-section-title"><h2>🎓 Registered Student Portal</h2>'
+        '<p class="bf-muted">Login using the email and password sent in your payment invoice.</p></div>',
+        unsafe_allow_html=True
+    )
 
+    s_email = st.text_input("Registered Email")
+    s_pass = st.text_input("Password", type="password")
+
+    st.write("")
+    col1, col2 = st.columns(2)
+    with col1:
+        st.button("Cancel", use_container_width=True, on_click=navigate, args=("home",))
+    with col2:
+        if st.button("Login", use_container_width=True, type="primary"):
+            df = pd.DataFrame(st.session_state.student_db)
+            if not df.empty and s_email in df['Email'].values:
+                # Get user row
+                user_row = df[df['Email'] == s_email].iloc[0]
+                if str(user_row.get('Password', '')) == s_pass and s_pass != "":
+                    st.session_state.logged_in_student = user_row.to_dict()
+                    navigate("student_dashboard")
+                else:
+                    st.error("Invalid password.")
+            else:
+                st.error("Email not found in our records.")
+
+elif st.session_state.app_state == "student_dashboard":
+    u_data = st.session_state.logged_in_student
+    st.markdown(
+        f'<div class="bf-section-title"><h2>Welcome back, {u_data.get("Name", "Student")}!</h2>'
+        '<p class="bf-muted">Here are your class details and invoice.</p></div>',
+        unsafe_allow_html=True
+    )
+
+    tab1, tab2 = st.tabs(["QR Code Entry ID", "My Invoice"])
+    
+    with tab1:
+        st.markdown("### Class Entry QR Code")
+        st.info(f"Show this to the instructor for **{u_data.get('Class', 'Dance Class')}**.")
+        qr_data = urllib.parse.quote(f"Student:{u_data.get('Name')}|Class:{u_data.get('Class')}")
+        qr_url = f"https://api.qrserver.com/v1/create-qr-code/?size=300x300&data={qr_data}"
+        st.image(qr_url)
+        
+    with tab2:
+        st.markdown("### Payment Invoice")
+        st.markdown(f'''
+        <div class="bf-summary">
+            <div><span class="bf-muted">Date</span><strong>{u_data.get("Timestamp", "N/A")}</strong></div>
+            <div><span class="bf-muted">Student Name</span><strong>{u_data.get("Name", "N/A")}</strong></div>
+            <div><span class="bf-muted">Email</span><strong>{u_data.get("Email", "N/A")}</strong></div>
+            <div><span class="bf-muted">Service/Class</span><strong>{u_data.get("Class", "N/A")}</strong></div>
+            <div><span class="bf-muted">Status</span><strong>{u_data.get("Status", "N/A")}</strong></div>
+            <div><span class="bf-muted">Total Paid</span><strong class="bf-price">${float(u_data.get("Fee", 0)):,.2f}</strong></div>
+        </div>
+        ''', unsafe_allow_html=True)
+        
+    st.write("")
+    if st.button("Logout", use_container_width=True):
+        st.session_state.logged_in_student = None
+        navigate("home")
+
+# --- MODIFIED: Admin Login & Dashboard ---
 elif st.session_state.app_state == "admin_login":
     st.markdown(
         '<div class="bf-section-title"><h2>🔒 Admin Login</h2>'
@@ -569,24 +714,35 @@ elif st.session_state.app_state == "admin_login":
             if a_user == "manasidharmadhikari" and a_pass == "bestofbollywood7925":
                 navigate("admin_dashboard")
             else:
-                st.error("Invalid credentials. Use admin / admin123.")
+                st.error("Invalid credentials.")
 
 
 elif st.session_state.app_state == "admin_dashboard":
     st.markdown(
-        '<div class="bf-section-title"><h2>📊 Specialized Trainer Portal</h2>'
-        '<p class="bf-muted">Live event log of all student interactions.</p></div>',
+        '<div class="bf-section-title"><h2>📊 Teacher Admin Portal</h2>'
+        '<p class="bf-muted">Select rows and hit delete (or use the trash icon) to remove garbage entries. Hit save to lock changes.</p></div>',
         unsafe_allow_html=True
     )
 
-    if os.path.exists(DB_FILE):
-        df = pd.read_csv(DB_FILE)
-        # Reverse the dataframe to show the newest entries at the top
-        df = df.iloc[::-1]
-        st.dataframe(df, use_container_width=True, hide_index=True)
+    if os.path.exists(DB_FILE) and st.session_state.student_db:
+        df = pd.DataFrame(st.session_state.student_db)
+        
+        # Add dynamic QR Link and Invoice String for Admin View
+        if 'Name' in df.columns and 'Class' in df.columns:
+            df['Admin_QR_Link'] = df.apply(
+                lambda row: f"https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=Student:{urllib.parse.quote(str(row['Name']))}|Class:{urllib.parse.quote(str(row['Class']))}", 
+                axis=1
+            )
+        
+        # Editable dataframe that allows row deletion
+        edited_df = st.data_editor(df, num_rows="dynamic", use_container_width=True, hide_index=True)
+        
+        if st.button("💾 Save Database Changes", type="primary"):
+            st.session_state.student_db = edited_df.to_dict('records')
+            edited_df.to_csv(DB_FILE, index=False)
+            st.success("Database changes saved successfully!")
 
-        csv = df.to_csv(index=False).encode("utf-8")
-
+        csv = edited_df.to_csv(index=False).encode("utf-8")
         st.download_button("Download CSV", data=csv, file_name="bollyfusion-registrations.csv", mime="text/csv", key="download_roster_csv")
     else:
         st.info("No students have registered yet during this session.")
