@@ -840,6 +840,55 @@ elif st.session_state.app_state == "admin_dashboard":
         unsafe_allow_html=True
     )
 
+    # --- Restore from Backup CSV ---
+    # bollyfusion_db.csv is intentionally gitignored (it can hold student data), which means
+    # a redeploy/reset that re-clones the repo wipes it. This lets a teacher re-upload a CSV
+    # they previously grabbed with "Download CSV" below to bring everything back.
+    with st.expander("🔄 Restore Database from Backup CSV", expanded=not st.session_state.student_db):
+        st.caption(
+            "If the app's storage got reset (e.g. after a redeploy) and the roster below is empty "
+            "or missing recent students, upload a CSV you previously downloaded from this page "
+            "(or the raw `bollyfusion_db.csv`) to restore it."
+        )
+        restore_file = st.file_uploader("Upload backup CSV", type=["csv"], key="restore_csv_uploader")
+        if restore_file is not None:
+            try:
+                restore_df = pd.read_csv(restore_file)
+            except Exception as e:
+                restore_df = None
+                st.error(f"Couldn't read that CSV: {e}")
+
+            if restore_df is not None:
+                required_cols = {"Name", "Email", "Class", "Status"}
+                missing_cols = required_cols - set(restore_df.columns)
+                if missing_cols:
+                    st.error(
+                        "This doesn't look like a BollyFusion roster CSV -- missing column(s): "
+                        + ", ".join(sorted(missing_cols))
+                    )
+                else:
+                    st.success(f"Found {len(restore_df)} record(s) in the uploaded file.")
+                    restore_mode = st.radio(
+                        "How should this be applied?",
+                        ["Replace current database", "Merge with current database (upsert by Email)"],
+                        key="restore_mode",
+                        horizontal=True
+                    )
+                    if st.button("✅ Confirm Restore", type="primary", key="confirm_restore_btn"):
+                        if restore_mode.startswith("Replace") or not st.session_state.student_db:
+                            new_records = restore_df.to_dict('records')
+                        else:
+                            existing_df = pd.DataFrame(st.session_state.student_db)
+                            combined = pd.concat([existing_df, restore_df], ignore_index=True)
+                            combined = combined.drop_duplicates(subset='Email', keep='last')
+                            new_records = combined.to_dict('records')
+
+                        st.session_state.student_db = new_records
+                        pd.DataFrame(new_records).to_csv(DB_FILE, index=False)
+                        _secure_chmod(DB_FILE)
+                        st.success(f"Restored {len(new_records)} student record(s) from backup.")
+                        st.rerun()
+
     if os.path.exists(DB_FILE) and st.session_state.student_db:
         df = pd.DataFrame(st.session_state.student_db)
         
