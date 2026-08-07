@@ -325,10 +325,28 @@ def reset_user():
     st.query_params.clear()
     st.session_state.app_state = "home"
 
-def process_registration():
-    update_db(st.session_state.current_user["Name"], 
-              st.session_state.current_user["Email"], 
-              "-", "Browsing Programs...", "Abandoned Early")
+# --- Client IP Detection ---
+def get_client_ip():
+    try:
+        if hasattr(st, 'context') and hasattr(st.context, 'headers'):
+            return st.context.headers.get("X-Forwarded-For", "Unknown IP").split(',')[0]
+        from streamlit.web.server.websocket_headers import _get_websocket_headers
+        headers = _get_websocket_headers()
+        if headers and "X-Forwarded-For" in headers:
+            return headers.get("X-Forwarded-For", "Unknown IP").split(',')[0]
+    except Exception:
+        pass
+    return "IP Unavailable"
+
+# --- Dynamic Processing Logic ---
+def process_registration(is_valid):
+    if not is_valid:
+        ip_addr = get_client_ip()
+        update_db(f"Guest ({ip_addr})", "No Details Provided", "-", "Browsing Programs...", "Just Browsing")
+    else:
+        update_db(st.session_state.current_user["Name"], 
+                  st.session_state.current_user["Email"], 
+                  "-", "Browsing Programs...", "Entered Details")
     navigate("classes")
 
 # --- Stripe Success Listener ---
@@ -361,18 +379,18 @@ if st.session_state.app_state == "home":
     with col1:
         st.button("Browse Program Options", use_container_width=True, type="primary", on_click=navigate, args=("register",))
     with col2:
-        st.button("Admin Portal", use_container_width=True, on_click=navigate, args=("admin_login",))
+        st.button("Dance Instructor Login", use_container_width=True, on_click=navigate, args=("admin_login",))
 
 
 elif st.session_state.app_state == "register":
     st.markdown(
         '<div class="bf-section-title"><h2>BROWSE PROGRAM OPTIONS AND PRICES</h2>'
-        '<p class="bf-muted">Enter your details to browse available programs.</p></div>',
+        '<p class="bf-muted">Enter your details, or simply browse.</p></div>',
         unsafe_allow_html=True
     )
 
-    st.session_state.current_user["Name"] = st.text_input("Full Name", value=st.session_state.current_user.get("Name", ""), placeholder="Jane Doe")
-    st.session_state.current_user["Email"] = st.text_input("Email", value=st.session_state.current_user.get("Email", ""), placeholder="jane@example.com")
+    st.session_state.current_user["Name"] = st.text_input("Full Name", value=st.session_state.current_user.get("Name", ""), placeholder="What do we call you?")
+    st.session_state.current_user["Email"] = st.text_input("Email", value=st.session_state.current_user.get("Email and / or Phone", ""), placeholder=".com .edu email ID")
 
     st.write("")
 
@@ -385,7 +403,8 @@ elif st.session_state.app_state == "register":
     with col1:
         st.button("Back", use_container_width=True, on_click=navigate, args=("home",))
     with col2:
-        st.button("Continue", use_container_width=True, type="primary", disabled=not valid, on_click=process_registration)
+        btn_label = "Continue" if valid else "I'll just browse"
+        st.button(btn_label, use_container_width=True, type="primary", on_click=process_registration, args=(valid,))
 
 
 elif st.session_state.app_state == "classes":
@@ -428,8 +447,8 @@ elif st.session_state.app_state == "classes":
                     st.session_state.current_user["Fee"] = prog["fee"]
                     st.session_state.current_user["Stripe Link"] = prog["stripe_link"]
                     
-                    update_db(st.session_state.current_user["Name"], 
-                              st.session_state.current_user["Email"], 
+                    update_db(st.session_state.current_user.get("Name", "Guest"), 
+                              st.session_state.current_user.get("Email", "None"), 
                               prog["id"], prog["name"], "Pending Payment")
 
                     navigate("checkout")
@@ -460,7 +479,7 @@ elif st.session_state.app_state == "checkout":
         </div>
         <div>
             <span class="bf-muted">Student</span>
-            <strong>{st.session_state.current_user.get("Name", "")}</strong>
+            <strong>{st.session_state.current_user.get("Name", "Guest")}</strong>
         </div>
         <div>
             <span class="bf-muted">Amount Due</span>
@@ -512,7 +531,7 @@ elif st.session_state.app_state == "success":
         unsafe_allow_html=True
     )
 
-    u_name = st.session_state.current_user.get("Name", "")
+    u_name = st.session_state.current_user.get("Name", "Guest")
     u_class = st.session_state.current_user.get("Class", "")
 
     qr_data = urllib.parse.quote(f"Student:{u_name}|Class:{u_class}")
