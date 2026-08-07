@@ -263,19 +263,21 @@ div.st-key-bf_chat_panel {
     overflow-y: auto !important;
 }
 
-/* Force chat bubbles to have a slightly lighter background so they contrast against the panel */
-/* Force chat bubbles to have a slightly lighter background */
-/* Force chat bubbles to have a slightly lighter background */
-div.st-key-bf_chat_panel div[data-testid="stChatInput"],
-div.st-key-bf_chat_panel div[data-testid="stChatInput"] div {
-    background-color: #140a20 !important; 
+div.st-key-bf_chat_panel div[data-testid="stChatMessage"] { 
+    padding: 12px !important; 
+    background-color: rgba(255, 255, 255, 0.08) !important; 
+    border-radius: 12px !important;
+    margin-bottom: 8px !important;
 }
 
-/* Force the actual typing area to be transparent (so the dark background shows) and keep text white */
-div.st-key-bf_chat_panel div[data-testid="stChatInput"] textarea {
+/* Strip the default grey backgrounds off Streamlit's inner message wrappers */
+div.st-key-bf_chat_panel div[data-testid="stChatMessage"] > div {
     background-color: transparent !important;
+}
+
+/* Force EVERY text element inside the bubble to be white, regardless of markdown wrappers */
+div.st-key-bf_chat_panel div[data-testid="stChatMessage"] * {
     color: #fdfbf7 !important;
-    -webkit-text-fill-color: #fdfbf7 !important; 
 }
 
 /* Fix the white background on the chat input container */
@@ -478,7 +480,7 @@ if st.session_state.app_state == "home":
 
     # --- FAQ knowledge base: fully aware of the studio's actual offered programs ---
     def _fmt_money(v):
-        return f"${v:,.0f}" if float(v) == int(v) else f"${v:,.2f}"
+        return f"\\${v:,.0f}" if float(v) == int(v) else f"\\${v:,.2f}"
 
     def _program_names():
         return [p["name"] for p in AVAILABLE_PROGRAMS] if AVAILABLE_PROGRAMS else []
