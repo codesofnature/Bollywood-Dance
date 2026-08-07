@@ -51,7 +51,7 @@ AVAILABLE_PROGRAMS = [
     "hours": 1.0,
     "weeks": 10,
     "fee": 1000.0,
-    "stripe_link": "https://buy.stripe.com/test_group_event_1000",
+    "stripe_link": "https://buy.stripe.com/14A14n7SQ6wI8hj3V49R606",
     "poster": "https://github.com/codesofnature/Bollywood-Dance/blob/main/4.jpg?raw=true",
     "desc": "Coordinate stunning group routines for your next big celebration or event.",
     "song_count": "2-3 songs"
@@ -62,7 +62,7 @@ AVAILABLE_PROGRAMS = [
     "hours": 1.0,
     "weeks": 12,
     "fee": 500.0,
-    "stripe_link": "https://buy.stripe.com/test_elite_fusion_2500",
+    "stripe_link": "https://buy.stripe.com/aFa14n6OM4oA1SVfDM9R607",
     "poster": "https://github.com/codesofnature/Bollywood-Dance/blob/main/5.jpg?raw=true",
     "desc": "High energy dance for the youngster techniques for aspiring competitive performers.",
     "song_count": "2-3 songs"
