@@ -186,16 +186,16 @@ button[kind="secondary"] {
     width: 100%; 
     height: 100%; 
     opacity: 0; 
-    /* Total cycle is 25 seconds (5 images x 5s each) */
-    animation: bf-fade 25s infinite; 
+    /* Reduced to 15 seconds total */
+    animation: bf-fade 15s infinite; 
 }
 
-/* Stagger the start time for each of the 5 images so they crossfade */
+/* Staggered by 3 seconds instead of 5 */
 .media-grid > .bf-hero-media:nth-child(1) { animation-delay: 0s; }
-.media-grid > .bf-hero-media:nth-child(2) { animation-delay: 5s; }
-.media-grid > .bf-hero-media:nth-child(3) { animation-delay: 10s; }
-.media-grid > .bf-hero-media:nth-child(4) { animation-delay: 15s; }
-.media-grid > .bf-hero-media:nth-child(5) { animation-delay: 20s; }
+.media-grid > .bf-hero-media:nth-child(2) { animation-delay: 2s; }
+.media-grid > .bf-hero-media:nth-child(3) { animation-delay: 4s; }
+.media-grid > .bf-hero-media:nth-child(4) { animation-delay: 6s; }
+.media-grid > .bf-hero-media:nth-child(5) { animation-delay: 8s; }
 
 .media-grid > .bf-hero-media img {
     width: 100%; height: 100%; object-fit: cover; display: block;
