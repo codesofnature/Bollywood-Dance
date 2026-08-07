@@ -157,12 +157,6 @@ button[kind="secondary"] {
     background: linear-gradient(180deg, rgba(10,5,16,.55) 0%, rgba(10,5,16,.55) 55%, rgba(10,5,16,.95) 100%);
 }
 
-.bf-pill {
-    display: inline-block; padding: 8px 14px; border-radius: 999px;
-    background: rgba(255, 255, 255, .1); border: 1px solid rgba(255, 255, 255, .18);
-    font-size: 13px; font-weight: 800; margin-bottom: 14px; backdrop-filter: blur(6px);
-}
-
 .bf-hero h1 {
     margin: 0 0 10px; font-size: clamp(2rem, 6vw, 3.4rem); line-height: 1.05; letter-spacing: -.04em;
     text-shadow: 0 4px 24px rgba(0,0,0,.5);
@@ -174,12 +168,6 @@ button[kind="secondary"] {
 }
 
 .bf-hero p.bf-sub { font-size: 1.02rem; margin: 0 0 4px; }
-
-.bf-trustrow {
-    display: flex; justify-content: center; gap: 18px; flex-wrap: wrap;
-    margin-top: 16px; font-size: 12.5px; font-weight: 700; color: rgba(253,251,247,.85);
-}
-.bf-trustrow span { display: inline-flex; align-items: center; gap: 6px; }
 
 .media-grid {
     display: flex; gap: 8px; overflow-x: auto; padding: 0; margin: 0;
@@ -205,15 +193,19 @@ button[kind="secondary"] {
 
 .bf-muted { color: rgba(253, 251, 247, .7); }
 
-.bf-features {
-    display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 4px 0 18px;
+.bf-gallery {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin: 4px 0 18px;
 }
-.bf-feature {
-    border-radius: 16px; padding: 14px 10px; text-align: center;
-    background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.1);
+.bf-gallery-item {
+    position: relative; aspect-ratio: 1 / 1; border-radius: 14px; overflow: hidden;
+    border: 1px solid rgba(255,255,255,.12);
 }
-.bf-feature .bf-feature-emoji { font-size: 1.4rem; display: block; margin-bottom: 4px; }
-.bf-feature .bf-feature-label { font-size: 12px; font-weight: 800; color: rgba(253,251,247,.9); }
+.bf-gallery-item img, .bf-gallery-item video {
+    width: 100%; height: 100%; object-fit: cover; display: block;
+}
+@media (min-width: 640px) {
+    .bf-gallery { grid-template-columns: repeat(5, 1fr); }
+}
 
 .bf-card {
     border-radius: 24px; overflow: hidden; border: 1px solid rgba(255, 255, 255, .15);
@@ -381,14 +373,8 @@ if st.session_state.app_state == "home":
             <div class="bf-hero-media"><img src="https://images.unsplash.com/photo-1747723836721-98e6c681dfcc?auto=format&fit=crop&w=700&q=80" alt="Dancer in traditional Indian attire mid-performance"/></div>
         </div>
         <div class="bf-hero-inner">
-            <div class="bf-pill">🎬 Bollywood Dance Studio</div>
             <h1>Master Cinematic Dance on Any Stage, <span class="bf-gradient">built for every stage</span></h1>
             <p class="bf-sub bf-muted">Choose a program, register, and pay securely — all in a couple of minutes.</p>
-            <div class="bf-trustrow">
-                <span>💃 All levels welcome</span>
-                <span>🎉 Wedding &amp; event choreography</span>
-                <span>🏆 Performance-ready training</span>
-            </div>
         </div>
     </div>
     ''', unsafe_allow_html=True)
@@ -401,13 +387,32 @@ if st.session_state.app_state == "home":
     with col3: st.button("Teacher Portal", use_container_width=True, on_click=navigate, args=("admin_login",))
 
     st.write("")
-    st.markdown('''
-    <div class="bf-features">
-        <div class="bf-feature"><span class="bf-feature-emoji">🩰</span><span class="bf-feature-label">Beginner &rarr; Company</span></div>
-        <div class="bf-feature"><span class="bf-feature-emoji">🎶</span><span class="bf-feature-label">Real Bollywood Choreo</span></div>
-        <div class="bf-feature"><span class="bf-feature-emoji">💳</span><span class="bf-feature-label">Secure Stripe Checkout</span></div>
-    </div>
-    ''', unsafe_allow_html=True)
+
+    # --- Studio gallery: 5 looping videos + 5 photos, front page only ---
+    # PLACEHOLDER LINKS -- swap these for your own studio photos/clips any time.
+    GALLERY_VIDEOS = [
+        "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4",
+        "https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+        "https://storage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+        "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+        "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
+    ]
+    GALLERY_IMAGES = [
+        "https://images.unsplash.com/photo-1547106510-6aec13ee41ff?auto=format&fit=crop&w=600&q=80",
+        "https://images.unsplash.com/photo-1563775957285-5860ffa885c0?auto=format&fit=crop&w=600&q=80",
+        "https://images.unsplash.com/photo-1712192682756-ae5b3a8e7508?auto=format&fit=crop&w=600&q=80",
+        "https://images.unsplash.com/photo-1598975762861-28118e88154e?auto=format&fit=crop&w=600&q=80",
+        "https://images.unsplash.com/photo-1652111132299-ff1056c87b35?auto=format&fit=crop&w=600&q=80",
+    ]
+    gallery_tiles = "".join(
+        f'<div class="bf-gallery-item"><video autoplay loop muted playsinline src="{v}"></video></div>'
+        for v in GALLERY_VIDEOS
+    ) + "".join(
+        f'<div class="bf-gallery-item"><img src="{i}" alt="Studio gallery photo"/></div>'
+        for i in GALLERY_IMAGES
+    )
+    st.markdown(f'<div class="bf-gallery">{gallery_tiles}</div>', unsafe_allow_html=True)
+    st.write("")
 
     # --- FAQ knowledge base: fully aware of the studio's actual offered programs ---
     def _fmt_money(v):
