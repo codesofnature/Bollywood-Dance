@@ -647,6 +647,92 @@ if st.session_state.app_state == "home":
                 st.session_state.chat_history.append({"role": "assistant", "content": answer})
                 st.rerun()
 
+elif st.session_state.app_state == "register":
+    st.markdown('<div class="bf-section-title"><h2>BROWSE PROGRAM OPTIONS AND PRICES</h2><p class="bf-muted">Enter your details, or simply browse.</p></div>', unsafe_allow_html=True)
+    st.session_state.current_user["Name"] = st.text_input("Full Name", value=st.session_state.current_user.get("Name", ""), placeholder="What do we call you?")
+    st.session_state.current_user["Email"] = st.text_input("Email", value=st.session_state.current_user.get("Email", ""), placeholder=".com .edu email ID")
+    st.write("")
+    email_pattern = r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"
+    is_valid_email = bool(re.match(email_pattern, st.session_state.current_user["Email"]))
+    valid = (st.session_state.current_user["Name"].strip() != "" and is_valid_email)
+
+    col1, col2 = st.columns(2)
+    with col1: st.button("Back", use_container_width=True, on_click=navigate, args=("home",))
+    with col2:
+        btn_label = "Continue" if valid else "I'll just browse"
+        st.button(btn_label, use_container_width=True, type="primary", on_click=process_registration, args=(valid,))
+
+elif st.session_state.app_state == "classes":
+    st.markdown('<div class="bf-section-title"><h2>Choose a Program</h2><p class="bf-muted">Tap a program to continue to secure checkout.</p></div>', unsafe_allow_html=True)
+    if not AVAILABLE_PROGRAMS:
+        st.info("No programs are currently available.")
+    else:
+        cols = st.columns(2)
+        for idx, prog in enumerate(AVAILABLE_PROGRAMS):
+            with cols[idx % 2]:
+                st.markdown(f'''
+                <div class="bf-card">
+                    <div class="bf-media">
+                        <img src="{prog['poster']}" alt="{prog['name']}">
+                        <div class="bf-overlay"></div>
+                        <div class="bf-badge">{prog['weeks']} Weeks</div>
+                    </div>
+                    <div class="bf-body">
+                        <h3>{prog['name']}</h3>
+                        <div class="bf-price">${prog['fee']:,.2f}</div>
+                    </div>
+                </div>
+                ''', unsafe_allow_html=True)
+                if st.button(f"Select {prog['name']}", key=f"select_{prog['id']}", use_container_width=True, type="primary"):
+                    st.session_state.current_user["Class"] = prog["name"]
+                    st.session_state.current_user["Program Number"] = prog["id"]
+                    st.session_state.current_user["Fee"] = prog["fee"]
+                    st.session_state.current_user["Stripe Link"] = prog["stripe_link"]
+                    update_db(st.session_state.current_user.get("Name", "Guest"), st.session_state.current_user.get("Email", "None"), prog["id"], prog["name"], "Pending Payment")
+                    navigate("checkout")
+    st.write("")
+    st.button("Back", use_container_width=True, on_click=navigate, args=("register",))
+
+elif st.session_state.app_state == "checkout":
+    selected_class, selected_fee = st.session_state.current_user.get("Class", ""), st.session_state.current_user.get("Fee", 0)
+    checkout_url = f"{st.session_state.current_user.get('Stripe Link', '#')}?prefilled_email={urllib.parse.quote(st.session_state.current_user.get('Email', ''))}"
+    st.markdown(f"### Amount Due: **${selected_fee:,.2f}**")
+    cb1 = st.checkbox("I agree to the Liability Waiver")
+    cb2 = st.checkbox("I agree to the Media Release")
+    st.write("")
+    col1, col2 = st.columns(2)
+    with col1: st.button("Back", use_container_width=True, on_click=navigate, args=("classes",))
+    with col2:
+        if cb1 and cb2: st.link_button(f"💳 Pay via Stripe", url=checkout_url, use_container_width=True, type="primary")
+        else: st.button(f"💳 Pay via Stripe", use_container_width=True, type="primary", disabled=True)
+
+elif st.session_state.app_state == "success":
+    st.markdown("### Payment Successful!")
+    st.button("Done (Back to Home)", use_container_width=True, type="primary", on_click=reset_user)
+
+elif st.session_state.app_state == "student_login":
+    s_email = st.text_input("Registered Email")
+    s_pass = st.text_input("Password", type="password")
+    col1, col2 = st.columns(2)
+    with col1: st.button("Cancel", use_container_width=True, on_click=navigate, args=("home",))
+    with col2:
+        if st.button("Login", use_container_width=True, type="primary"):
+            df = pd.DataFrame(st.session_state.student_db)
+            if not df.empty and s_email in df['Email'].values:
+                user_row = df[df['Email'] == s_email].iloc[0]
+                if verify_password(s_pass, user_row.get('PasswordSalt', ''), user_row.get('PasswordHash', '')):
+                    st.session_state.logged_in_student = user_row.to_dict()
+                    navigate("student_dashboard")
+                    st.rerun()
+                else: st.error("Invalid credentials.")
+            else: st.error("Invalid credentials.")
+
+elif st.session_state.app_state == "student_dashboard":
+    st.write("Welcome to your dashboard!")
+    if st.button("Logout", use_container_width=True):
+        st.session_state.logged_in_student = None
+        navigate("home")
+
 elif st.session_state.app_state == "admin_dashboard":
     st.markdown('<div class="bf-section-title"><h2>Registered Students</h2><p class="bf-muted">Full profile for every student who has registered or paid.</p></div>', unsafe_allow_html=True)
 
