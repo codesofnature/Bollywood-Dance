@@ -14,7 +14,7 @@ from email.mime.multipart import MIMEMultipart
 import filelock
 
 st.set_page_config(
-    page_title="BollyFusion Academy",
+    page_title="Phase Change, Inc",
     layout="centered",
     initial_sidebar_state="collapsed"
 )
@@ -493,7 +493,7 @@ if st.session_state.app_state == "home":
     FAQS = [
         {"q": "Where is the studio located?",
          "kw": ["location", "where", "address", "studio", "directions", "erie", "pa", "located", "city", "street"],
-         "a": "We are located at **2727 W 21st St, Erie, PA 16506**."},
+         "a": "We are located at 2727 W 21st St, Erie, PA 16506."},
          
         {"q": "What programs / levels do you offer?",
          "kw": ["program", "level", "class", "offer", "options", "types", "teach", "learn", "courses"],
@@ -504,7 +504,7 @@ if st.session_state.app_state == "home":
          "a": f"Program fees range from **{_fee_range()}** for the full term, depending on the level and number of weeks. Tap 'Browse Program Options' for exact pricing per class."},
          
         {"q": "What is Bollywood dance / cardio style like?",
-         "kw": ["what is bollywood", "style", "what kind of dance", "genre", "culture", "indian", "history", "about bollywood", "cardio", "fitness", "workout", "exercise"],
+         "kw": ["what is bollywood", "style", "what kind of dance", "dance", "genre", "culture", "indian", "history", "about bollywood", "cardio", "fitness", "workout", "exercise"],
          "a": "Bollywood dance blends high-energy cinematic choreography from Indian films with elements of hip-hop, folk, and classical Indian movement — it's fun, expressive, and an amazing full-body cardio workout disguised as dance."},
          
         {"q": "What ages do you teach?",
@@ -557,7 +557,7 @@ if st.session_state.app_state == "home":
         return best if best_score > 0 else None
 
     if "chat_history" not in st.session_state:
-        st.session_state.chat_history = [{"role": "assistant", "content": "Hi! 👋 Ask me about our programs, pricing, schedule, location, or anything else about the studio."}]
+        st.session_state.chat_history = [{"role": "assistant", "content": "Hey, Im Nikki..Ask me anything"}]
     if "chat_open" not in st.session_state:
         st.session_state.chat_open = False
 
@@ -569,7 +569,7 @@ if st.session_state.app_state == "home":
 
     if st.session_state.chat_open:
         with st.container(key="bf_chat_panel"):
-            st.markdown("**💬 Chat with BollyFusion**")
+            st.markdown("**Chat with Nikki")
             for msg in st.session_state.chat_history:
                 align_class = "user" if msg["role"] == "user" else "bot"
                 st.markdown(f'''
@@ -589,7 +589,7 @@ if st.session_state.app_state == "home":
                     answer = match["a"]
                 else:
                     # Immediate phone number fallback if it cannot confidently answer
-                    answer = "I'm sorry, I don't have the exact answer for that. **Please call our support at 2341239239** for immediate assistance."
+                    answer = "Might be best to call me at 330-6085999 for a quick chat"
                 
                 st.session_state.chat_history.append({"role": "assistant", "content": answer})
                 st.rerun()
