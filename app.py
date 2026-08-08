@@ -780,6 +780,26 @@ elif st.session_state.app_state == "admin_dashboard":
                         st.markdown(f"**Fee:** {fee_display}")
                         st.markdown(f"**Registered:** {row.get('Timestamp', '-')}")
                         st.markdown(f"**Portal Login Set:** {'Yes' if row.get('PasswordHash') else 'No'}")
+                        
+                        # --- NEW: Delete Record Button ---
+                        st.write("") # Spacer
+                        if st.button("🗑️ Delete Record", key=f"del_{row.get('Email', 'unknown')}_{_}"):
+                            target_email = row.get("Email")
+                            if target_email:
+                                lock = filelock.FileLock(f"{DB_FILE}.lock")
+                                with lock:
+                                    if os.path.exists(DB_FILE):
+                                        # Read current DB, filter out the deleted email, and save
+                                        df_current = pd.read_csv(DB_FILE)
+                                        df_current = df_current[df_current['Email'] != target_email]
+                                        df_current.to_csv(DB_FILE, index=False)
+                                        _secure_chmod(DB_FILE)
+                                        
+                                        # Update session state to reflect changes instantly
+                                        st.session_state.student_db = df_current.to_dict('records')
+                                
+                                st.success(f"Record for {target_email} deleted.")
+                                st.rerun()
         else:
             st.dataframe(
                 df_students.drop(columns=["PasswordSalt", "PasswordHash"], errors="ignore"),
