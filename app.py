@@ -29,7 +29,11 @@ AVAILABLE_PROGRAMS = [
     "stripe_link": "https://buy.stripe.com/6oU00jgpm9IUfJLezI9R603",
     "poster": "https://github.com/codesofnature/Bollywood-Dance/blob/main/1.jpg?raw=true",
     "desc": "High-energy entry-level fitness infused with cinematic Bollywood flair.",
-    "song_count": "4-5 songs"
+    "song_count": "4-5 songs",
+    "start_dates": [
+      "Sept 1 2026",
+      "Oct 1 2026"
+    ]
   },
   {
     "id": "2",
@@ -40,7 +44,11 @@ AVAILABLE_PROGRAMS = [
     "stripe_link": "https://buy.stripe.com/00waEX3CA8EQapr1MW9R604",
     "poster": "https://github.com/codesofnature/Bollywood-Dance/blob/main/2.jpg?raw=true",
     "desc": "Level up your stamina with complex beats and faster choreography.",
-    "song_count": "4-5 songs"
+    "song_count": "4-5 songs",
+    "start_dates": [
+      "Sept 1 2026",
+      "Oct 1 2026"
+    ]
   },
   {
     "id": "3",
@@ -51,7 +59,11 @@ AVAILABLE_PROGRAMS = [
     "stripe_link": "https://buy.stripe.com/3cIbJ15KI08keFH9fo9R605",
     "poster": "https://github.com/codesofnature/Bollywood-Dance/blob/main/3.jpg?raw=true",
     "desc": "Perfect for events/weddings/performances! Master partner choreography with elegance and grace.",
-    "song_count": "2-3 songs"
+    "song_count": "2-3 songs",
+    "start_dates": [
+      "Sept 15 2026",
+      "Nov 1 2026"
+    ]
   },
   {
     "id": "4",
@@ -62,7 +74,11 @@ AVAILABLE_PROGRAMS = [
     "stripe_link": "https://buy.stripe.com/14A14n7SQ6wI8hj3V49R606",
     "poster": "https://github.com/codesofnature/Bollywood-Dance/blob/main/4.jpg?raw=true",
     "desc": "Coordinate stunning group routines for your next big celebration or event.",
-    "song_count": "2-3 songs"
+    "song_count": "2-3 songs",
+    "start_dates": [
+      "Sept 15 2026",
+      "Nov 1 2026"
+    ]
   },
   {
     "id": "5",
@@ -73,10 +89,14 @@ AVAILABLE_PROGRAMS = [
     "stripe_link": "https://buy.stripe.com/aFa14n6OM4oA1SVfDM9R607",
     "poster": "https://github.com/codesofnature/Bollywood-Dance/blob/main/5.jpg?raw=true",
     "desc": "High energy dance for the youngster techniques for aspiring competitive performers.",
-    "song_count": "2-3 songs"
+    "song_count": "2-3 songs",
+    "start_dates": [
+      "Sept 1 2026"
+    ]
   }
 ]
 DB_FILE = "bollyfusion_db.csv"
+REQUIRED_COLUMNS = ["Timestamp", "Name", "Email", "Program Number", "Class", "Start Date", "Status", "PasswordSalt", "PasswordHash", "Fee"]
 
 # --- Security Helpers ---
 PBKDF2_ITERATIONS = 200_000
@@ -186,11 +206,9 @@ button[kind="secondary"] {
     width: 100%; 
     height: 100%; 
     opacity: 0; 
-    /* Reduced to 15 seconds total */
     animation: bf-fade 15s infinite; 
 }
 
-/* Staggered by 3 seconds instead of 5 */
 .media-grid > .bf-hero-media:nth-child(1) { animation-delay: 0s; }
 .media-grid > .bf-hero-media:nth-child(2) { animation-delay: 2s; }
 .media-grid > .bf-hero-media:nth-child(3) { animation-delay: 4s; }
@@ -199,7 +217,6 @@ button[kind="secondary"] {
 
 .media-grid > .bf-hero-media img {
     width: 100%; height: 100%; object-fit: cover; display: block;
-    /* Keeps the slow zoom effect you already have */
     animation: bf-kenburns 14s ease-in-out infinite alternate;
 }
 .media-grid > .bf-hero-media:nth-child(even) img { 
@@ -207,7 +224,6 @@ button[kind="secondary"] {
     animation-duration: 18s; 
 }
 
-/* The math: 5 images = each gets 20% of the timeline to shine */
 @keyframes bf-fade {
     0%   { opacity: 0; }
     8%   { opacity: 1; }
@@ -263,51 +279,15 @@ div.st-key-bf_chat_panel {
     overflow-y: auto !important;
 }
 
-/* Custom Flexbox Chat Bubbles (Left/Right Layout) */
-.bf-chat-row {
-    display: flex;
-    width: 100%;
-    margin-bottom: 12px;
-}
-.bf-chat-row.user {
-    justify-content: flex-end; /* Pushes user messages to the right */
-}
-.bf-chat-row.bot {
-    justify-content: flex-start; /* Pushes bot messages to the left */
-}
-.bf-chat-bubble {
-    padding: 10px 14px;
-    border-radius: 18px;
-    max-width: 85%;
-    font-size: 15px;
-    line-height: 1.4;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-}
-.bf-chat-row.user .bf-chat-bubble {
-    background-color: #007AFF !important; /* Blue user bubble */
-    border-bottom-right-radius: 4px;
-}
-.bf-chat-row.bot .bf-chat-bubble {
-    background-color: #34C759 !important; /* Green bot bubble */
-    border-bottom-left-radius: 4px;
-}
-/* Force all text inside the bubbles to be crisp white */
-.bf-chat-bubble p, .bf-chat-bubble * {
-    margin: 0 !important;
-    color: #fdfbf7 !important;
-}
-
-/* Fix the white background on the chat input container */
-div.st-key-bf_chat_panel div[data-testid="stChatInput"] {
-    background-color: #140a20 !important; 
-}
-
-/* Fix the actual typing area and send button to match the dark theme */
-div.st-key-bf_chat_panel div[data-testid="stChatInput"] textarea {
-    background-color: rgba(255, 255, 255, 0.08) !important;
-    color: #fdfbf7 !important;
-    -webkit-text-fill-color: #fdfbf7 !important; /* Critical for overriding iOS defaults */
-}
+.bf-chat-row { display: flex; width: 100%; margin-bottom: 12px; }
+.bf-chat-row.user { justify-content: flex-end; }
+.bf-chat-row.bot { justify-content: flex-start; }
+.bf-chat-bubble { padding: 10px 14px; border-radius: 18px; max-width: 85%; font-size: 15px; line-height: 1.4; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+.bf-chat-row.user .bf-chat-bubble { background-color: #007AFF !important; border-bottom-right-radius: 4px; }
+.bf-chat-row.bot .bf-chat-bubble { background-color: #34C759 !important; border-bottom-left-radius: 4px; }
+.bf-chat-bubble p, .bf-chat-bubble * { margin: 0 !important; color: #fdfbf7 !important; }
+div.st-key-bf_chat_panel div[data-testid="stChatInput"] { background-color: #140a20 !important; }
+div.st-key-bf_chat_panel div[data-testid="stChatInput"] textarea { background-color: rgba(255, 255, 255, 0.08) !important; color: #fdfbf7 !important; -webkit-text-fill-color: #fdfbf7 !important; }
 
 </style>
 ''', unsafe_allow_html=True)
@@ -315,28 +295,36 @@ div.st-key-bf_chat_panel div[data-testid="stChatInput"] textarea {
 if "app_state" not in st.session_state:
     st.session_state.app_state = "home"
 if "current_user" not in st.session_state:
-    st.session_state.current_user = {"Name": "", "Email": "", "Program Number": "-", "Class": "-", "Fee": 0.0, "Stripe Link": ""}
+    st.session_state.current_user = {"Name": "", "Email": "", "Program Number": "-", "Class": "-", "Start Date": "-", "Fee": 0.0, "Stripe Link": ""}
 if "logged_in_student" not in st.session_state:
     st.session_state.logged_in_student = None
 
 if "student_db" not in st.session_state:
     if os.path.exists(DB_FILE):
-        st.session_state.student_db = pd.read_csv(DB_FILE).to_dict('records')
-        _secure_chmod(DB_FILE)
+        try:
+            df = pd.read_csv(DB_FILE)
+            # Ensure new columns exist for legacy databases
+            for col in REQUIRED_COLUMNS:
+                if col not in df.columns:
+                    df[col] = "-" if col != "Fee" else 0.0
+            st.session_state.student_db = df.to_dict('records')
+        except Exception:
+            st.session_state.student_db = []
     else:
         st.session_state.student_db = []
 
-# Using FileLock for thread-safety and to prevent race conditions during DB updates
-def update_db(name, email, prog_num, class_name, status, password="", fee=0.0):
+def update_db(name, email, prog_num, class_name, start_date, status, password="", fee=0.0):
     lock = filelock.FileLock(f"{DB_FILE}.lock")
     with lock:
         timestamp = datetime.datetime.now().strftime("%Y-%m-%d %I:%M %p")
         
-        # Fresh read inside lock
         if os.path.exists(DB_FILE):
             df = pd.read_csv(DB_FILE)
+            for col in REQUIRED_COLUMNS:
+                if col not in df.columns:
+                    df[col] = "-" if col != "Fee" else 0.0
         else:
-            df = pd.DataFrame(columns=["Timestamp", "Name", "Email", "Program Number", "Class", "Status", "PasswordSalt", "PasswordHash", "Fee"])
+            df = pd.DataFrame(columns=REQUIRED_COLUMNS)
 
         pw_salt, pw_hash = (None, None)
         if password:
@@ -349,6 +337,7 @@ def update_db(name, email, prog_num, class_name, status, password="", fee=0.0):
                 df.at[idx, 'Name'] = name
                 df.at[idx, 'Program Number'] = prog_num
                 df.at[idx, 'Class'] = class_name
+                df.at[idx, 'Start Date'] = start_date
                 df.at[idx, 'Status'] = status
                 if pw_hash:
                     df.at[idx, 'PasswordSalt'] = pw_salt
@@ -363,16 +352,13 @@ def update_db(name, email, prog_num, class_name, status, password="", fee=0.0):
 
         record = {
             "Timestamp": timestamp, "Name": name, "Email": email, "Program Number": prog_num,
-            "Class": class_name, "Status": status, "PasswordSalt": pw_salt, "PasswordHash": pw_hash, "Fee": fee
+            "Class": class_name, "Start Date": start_date, "Status": status, "PasswordSalt": pw_salt, "PasswordHash": pw_hash, "Fee": fee
         }
         df = pd.concat([df, pd.DataFrame([record])], ignore_index=True)
         st.session_state.student_db = df.to_dict('records')
         df.to_csv(DB_FILE, index=False)
         _secure_chmod(DB_FILE)
 
-# One-time demo seed: gives the teacher 3 already-paid students to look at
-# the very first time the app runs. Runs only while DB_FILE doesn't exist yet,
-# so it never re-adds students on later reruns/restarts.
 def _seed_demo_students():
     if os.path.exists(DB_FILE) or not AVAILABLE_PROGRAMS:
         return
@@ -384,8 +370,9 @@ def _seed_demo_students():
     for i, s in enumerate(demo_students):
         prog = AVAILABLE_PROGRAMS[i % len(AVAILABLE_PROGRAMS)]
         demo_password = generate_secure_password(12)
+        demo_date = prog.get("start_dates", ["Anytime"])[0]
         update_db(
-            s["name"], s["email"], prog["id"], prog["name"],
+            s["name"], s["email"], prog["id"], prog["name"], demo_date,
             "Paid ✅", password=demo_password, fee=prog["fee"]
         )
 
@@ -400,7 +387,7 @@ def send_email_invoice(to_email, name, class_name, fee, password):
     subject = "BollyFusion Academy - Payment Invoice & Portal Login"
     body = (f"Hi {name},\n\nThank you for your payment of ${fee:.2f} for {class_name}.\n\n"
             f"Your Registered Student Portal login details are:\nEmail: {to_email}\nPassword: {password}\n\n"
-            f"Please log in via the website to access your unique QR code for class entry and view this invoice.\n\nBest,\nBollyFusion Academy")
+            f"Please log in via the website to access your unique QR code for class entry and view this invoice.\n\nBest,\nBollyFusion Academy\nBilling Provider: Phase Change, Inc")
     try:
         msg = MIMEMultipart()
         msg['From'] = sender_email
@@ -420,7 +407,7 @@ def send_email_invoice(to_email, name, class_name, fee, password):
 
 def navigate(to_state): st.session_state.app_state = to_state
 def reset_user():
-    st.session_state.current_user = {"Name": "", "Email": "", "Program Number": "-", "Class": "-", "Fee": 0.0, "Stripe Link": ""}
+    st.session_state.current_user = {"Name": "", "Email": "", "Program Number": "-", "Class": "-", "Start Date": "-", "Fee": 0.0, "Stripe Link": ""}
     st.query_params.clear()
     st.session_state.app_state = "home"
 
@@ -434,9 +421,9 @@ def get_client_ip():
 def process_registration(is_valid):
     if not is_valid:
         ip_addr = get_client_ip()
-        update_db(f"Guest ({ip_addr})", "No Details Provided", "-", "Browsing Programs...", "Just Browsing")
+        update_db(f"Guest ({ip_addr})", "No Details Provided", "-", "Browsing Programs...", "-", "Just Browsing")
     else:
-        update_db(st.session_state.current_user["Name"], st.session_state.current_user["Email"], "-", "Browsing Programs...", "Entered Details")
+        update_db(st.session_state.current_user["Name"], st.session_state.current_user["Email"], "-", "Browsing Programs...", "-", "Entered Details")
     navigate("classes")
 
 if "status" in st.query_params and st.query_params["status"] == "success":
@@ -444,13 +431,10 @@ if "status" in st.query_params and st.query_params["status"] == "success":
         st.session_state.app_state = "success"
         if st.session_state.current_user.get("Email"):
             gen_pw = generate_secure_password(12)
-            update_db(st.session_state.current_user["Name"], st.session_state.current_user["Email"], st.session_state.current_user["Program Number"], st.session_state.current_user["Class"], "Paid ✅", password=gen_pw, fee=st.session_state.current_user.get("Fee", 0.0))
+            update_db(st.session_state.current_user["Name"], st.session_state.current_user["Email"], st.session_state.current_user["Program Number"], st.session_state.current_user["Class"], st.session_state.current_user.get("Start Date", "-"), "Paid ✅", password=gen_pw, fee=st.session_state.current_user.get("Fee", 0.0))
             send_email_invoice(st.session_state.current_user["Email"], st.session_state.current_user["Name"], st.session_state.current_user["Class"], st.session_state.current_user.get("Fee", 0.0), gen_pw)
 
-
 if st.session_state.app_state == "home":
-    # Splash UI: curated, real Bollywood-dance photography with a slow Ken Burns
-    # drift (no broken/irrelevant placeholder video files).
     st.markdown('''
     <div class="bf-hero">
         <div class="media-grid">
@@ -476,125 +460,8 @@ if st.session_state.app_state == "home":
 
     st.write("")
 
-    # --- Studio gallery media links -- kept here as code only (not rendered on
-    # the page). Swap these for your own studio photos/clips any time, then
-    # wire GALLERY_IMAGES / GALLERY_VIDEOS into a section wherever you'd like
-    # them displayed.
-    GALLERY_VIDEOS = [
-        "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4",
-        "https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
-        "https://storage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
-        "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
-        "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
-    ]
-    GALLERY_IMAGES = [
-        "https://images.unsplash.com/photo-1547106510-6aec13ee41ff?auto=format&fit=crop&w=600&q=80",
-        "https://images.unsplash.com/photo-1563775957285-5860ffa885c0?auto=format&fit=crop&w=600&q=80",
-        "https://images.unsplash.com/photo-1712192682756-ae5b3a8e7508?auto=format&fit=crop&w=600&q=80",
-        "https://images.unsplash.com/photo-1598975762861-28118e88154e?auto=format&fit=crop&w=600&q=80",
-        "https://images.unsplash.com/photo-1652111132299-ff1056c87b35?auto=format&fit=crop&w=600&q=80",
-    ]
-
-    # --- FAQ knowledge base: fully aware of the studio's actual offered programs ---
-    def _fmt_money(v):
-        return f"\\${v:,.0f}" if float(v) == int(v) else f"\\${v:,.2f}"
-
-    def _program_names():
-        return [p["name"] for p in AVAILABLE_PROGRAMS] if AVAILABLE_PROGRAMS else []
-
-    def _fee_range():
-        if not AVAILABLE_PROGRAMS: return "please check Browse Program Options"
-        fees = [p["fee"] for p in AVAILABLE_PROGRAMS]
-        return f"{_fmt_money(min(fees))} to {_fmt_money(max(fees))}" if min(fees) != max(fees) else _fmt_money(fees[0])
-
-    def _kids_program():
-        return next((p for p in AVAILABLE_PROGRAMS if "kid" in p["name"].lower()), None)
-
-    def _event_programs():
-        return [p for p in AVAILABLE_PROGRAMS if any(k in p["name"].lower() for k in ["event", "couple"])]
-
-    def _company_program():
-        return next((p for p in AVAILABLE_PROGRAMS if any(k in p["name"].lower() for k in ["premier", "company"])), None)
-
-    def _cardio_programs():
-        return [p for p in AVAILABLE_PROGRAMS if "cardio" in p["name"].lower()]
-
-    names = _program_names()
-    names_str = ", ".join(names) if names else "our current programs (see Browse Program Options)"
-    kids_p = _kids_program()
-    company_p = _company_program()
-    event_ps = _event_programs()
-    cardio_ps = _cardio_programs()
-
     FAQS = [
-        {"q": "What programs / levels do you offer?",
-         "kw": ["program", "level", "class", "offer", "options", "types"],
-         "a": f"We currently offer: **{names_str}**. Each is designed for a different stage — from first-timers to performance-ready dancers. Tap 'Browse Program Options' to see full details."},
-        {"q": "How much do classes cost?",
-         "kw": ["price", "cost", "fee", "how much", "expensive", "pricing"],
-         "a": f"Program fees range from **{_fee_range()}** for the full term, depending on the level and number of weeks. Tap 'Browse Program Options' for exact pricing per class."},
-        {"q": "What ages do you teach?",
-         "kw": ["age", "kid", "child", "children", "young", "adult", "teen"],
-         "a": (f"We welcome adults in most programs, plus a dedicated **{kids_p['name']}** class for younger dancers." if kids_p
-               else "Our programs are primarily designed for teens and adults — check Browse Program Options for the age focus of each level.")},
-        {"q": "Do I need prior dance experience?",
-         "kw": ["experience", "beginner", "never danced", "background", "new to dance", "first time"],
-         "a": "Not at all! Our entry-level cardio classes are built for total beginners — no dance background needed. As you progress, later levels add more technical choreography."},
-        {"q": "What should I wear to class?",
-         "kw": ["wear", "outfit", "clothes", "attire", "shoes", "dress code"],
-         "a": "Comfortable, breathable workout clothes and supportive sneakers or dance sneakers work best. Avoid anything restrictive — you'll be moving a lot!"},
-        {"q": "How long is each program / how many weeks?",
-         "kw": ["weeks", "duration", "long", "term", "how many classes"],
-         "a": "Program length varies by level, generally 10-20 weeks per term. Exact duration for each program is shown on the 'Browse Program Options' page."},
-        {"q": "Is there a trial or drop-in class?",
-         "kw": ["trial", "drop in", "try", "sample", "first class free"],
-         "a": "We don't run a separate free trial — registration secures your spot for the full program term. If you're unsure which level fits you, message us here and we'll point you in the right direction."},
-        {"q": "How do I sign up / register?",
-         "kw": ["sign up", "register", "enroll", "join", "how do i start"],
-         "a": "Tap 'Browse Program Options', enter your name and email, choose your program, and complete secure checkout. You'll get portal login details by email right after payment."},
-        {"q": "What payment methods do you accept?",
-         "kw": ["payment", "pay", "stripe", "credit card", "card", "venmo"],
-         "a": "We accept all major credit/debit cards through secure Stripe checkout — no cash or manual payment needed to register."},
-        {"q": "What is Bollywood dance / cardio style like?",
-         "kw": ["what is bollywood", "style", "what kind of dance", "genre"],
-         "a": "Bollywood dance blends high-energy cinematic choreography from Indian films with elements of hip-hop, folk, and classical Indian movement — it's fun, expressive, and a great workout."},
-        {"q": "Do you host performances or showcase events?",
-         "kw": ["event", "performance", "showcase", "recital", "perform"],
-         "a": "Yes! Several programs include live events and showcases through the year — details and any event fees are listed per program on the pricing page."},
-        {"q": "What's the difference between Cardio I and Cardio II?",
-         "kw": ["cardio 1", "cardio i", "cardio 2", "cardio ii", "difference between", "which cardio"],
-         "a": (f"**{cardio_ps[0]['name']}** is the entry-level class focused on fundamentals and fitness. **{cardio_ps[1]['name']}** builds on that with faster combinations and more complex choreography." if len(cardio_ps) >= 2
-               else "Our cardio levels progress from fundamentals to faster, more complex choreography as you move up.")},
-        {"q": "Do you offer wedding or couples choreography?",
-         "kw": ["wedding", "couple", "sangeet", "first dance", "engagement"],
-         "a": (f"Yes — our **{event_ps[0]['name']}** program is built exactly for that: personalized partner choreography for weddings, sangeets, and special events." if event_ps
-               else "We offer small-group and couples choreography for weddings and events — see Browse Program Options for current availability.")},
-        {"q": "Do you offer private lessons or group event choreography?",
-         "kw": ["private lesson", "group choreography", "custom routine", "book a routine"],
-         "a": (f"Our **{event_ps[-1]['name']}** program covers custom group routines for celebrations and events. For fully private 1-on-1 lessons, message us here and we'll follow up directly." if event_ps
-               else "For custom group or private choreography requests, please message us here and our team will follow up directly.")},
-        {"q": "Where is the studio located?",
-         "kw": ["location", "where", "address", "studio", "directions"],
-         "a": "We're at our Main Studio location. Exact address and entry details are sent automatically to registered students after checkout for security."},
-        {"q": "What is your cancellation / refund policy?",
-         "kw": ["refund", "cancel", "cancellation", "reschedule", "policy"],
-         "a": "Program fees cover the full term once classes begin. For cancellations before a term starts, or any special circumstances, please contact the studio directly and we'll help sort it out."},
-        {"q": "How many songs will we learn?",
-         "kw": ["songs", "how many routines", "choreography count", "music"],
-         "a": ("Shorter terms typically cover 2-3 songs, while full 20-week terms cover 4-5 full routines" + (f" — for example, **{AVAILABLE_PROGRAMS[0]['name']}** covers {AVAILABLE_PROGRAMS[0]['song_count']}." if AVAILABLE_PROGRAMS else "."))},
-        {"q": "Is Bollywood dance a good workout?",
-         "kw": ["workout", "fitness", "cardio workout", "calories", "exercise", "burn"],
-         "a": "Definitely — it's a full-body cardio workout disguised as fun. Expect an elevated heart rate, improved coordination, and serious stamina gains over a term."},
-        {"q": "Do I get an online student portal after registering?",
-         "kw": ["portal", "login", "account", "dashboard", "qr code"],
-         "a": "Yes — once you complete checkout, we email you a secure portal login (with a generated password) where you can view your class details and entry QR code."},
-        {"q": "Is there a company / advanced performance team?",
-         "kw": ["company", "advanced team", "competitive", "premier"],
-         "a": (f"Yes — **{company_p['name']}** is our flagship, audition-caliber team for stage-ready, competitive-level dancers." if company_p
-               else "Yes — our top level is reserved for advanced, performance-ready dancers. Check Browse Program Options for current availability.")},
-        {"q": "How can I contact the studio for more help?",
-         "kw": ["contact", "phone", "email", "call", "support", "help", "talk to someone"],
-         "a": "Happy to help directly — please call our support line at **2341239239**, or leave your question here and we'll follow up."},
+        {"q": "What programs / levels do you offer?", "kw": ["program", "level", "class", "offer", "options", "types"], "a": "We offer a variety of cinematic dance programs for all levels. Tap 'Browse Program Options' to see full details."},
     ]
 
     def _match_faq(user_text):
@@ -616,7 +483,6 @@ if st.session_state.app_state == "home":
     def _toggle_chat():
         st.session_state.chat_open = not st.session_state.chat_open
 
-    # Floating chat launcher icon (fixed bottom-right, pops the panel open/closed)
     with st.container(key="bf_fab"):
         st.button("💬" if not st.session_state.chat_open else "✖️", key="bf_fab_btn", on_click=_toggle_chat)
 
@@ -688,22 +554,52 @@ elif st.session_state.app_state == "classes":
                     st.session_state.current_user["Program Number"] = prog["id"]
                     st.session_state.current_user["Fee"] = prog["fee"]
                     st.session_state.current_user["Stripe Link"] = prog["stripe_link"]
-                    update_db(st.session_state.current_user.get("Name", "Guest"), st.session_state.current_user.get("Email", "None"), prog["id"], prog["name"], "Pending Payment")
+                    update_db(st.session_state.current_user.get("Name", "Guest"), st.session_state.current_user.get("Email", "None"), prog["id"], prog["name"], "-", "Pending Payment")
                     navigate("checkout")
     st.write("")
     st.button("Back", use_container_width=True, on_click=navigate, args=("register",))
 
 elif st.session_state.app_state == "checkout":
-    selected_class, selected_fee = st.session_state.current_user.get("Class", ""), st.session_state.current_user.get("Fee", 0)
+    selected_class = st.session_state.current_user.get("Class", "")
+    selected_fee = st.session_state.current_user.get("Fee", 0)
     checkout_url = f"{st.session_state.current_user.get('Stripe Link', '#')}?prefilled_email={urllib.parse.quote(st.session_state.current_user.get('Email', ''))}"
+    
+    st.markdown(f"### Checkout: {selected_class}")
+    
+    # Select Start Date Logic
+    active_program = next((p for p in AVAILABLE_PROGRAMS if p['id'] == st.session_state.current_user["Program Number"]), None)
+    available_dates = active_program.get("start_dates", ["Anytime"]) if active_program else ["Anytime"]
+    chosen_date = st.selectbox("Select Program Start Date", available_dates)
+    st.session_state.current_user["Start Date"] = chosen_date
+    
     st.markdown(f"### Amount Due: **${selected_fee:,.2f}**")
-    cb1 = st.checkbox("I agree to the Liability Waiver")
-    cb2 = st.checkbox("I agree to the Media Release")
+    
+    legal_disclaimer = '''BINDING AGREEMENT, WAIVER AND RELEASE OF LIABILITY, ASSUMPTION OF RISK, AND INDEMNITY AGREEMENT.
+
+By completing this transaction and participating in any programs, events, or classes, you (the "Participant") agree to all terms and conditions set forth herein. 
+
+1. BILLING ENTITY: The Participant understands and agrees that all financial transactions, billing, invoicing, and payment processing are managed exclusively by Phase Change, Inc. Any references to payment, refunds, or financial liability shall be directed to and governed by Phase Change, Inc.
+
+2. ASSUMPTION OF RISK: The Participant acknowledges that dance and fitness programs involve physical exertion and movement, which carry inherent risks of injury, illness, or property damage. The Participant voluntarily assumes all risks associated with participation.
+
+3. WAIVER AND RELEASE: In consideration for being permitted to participate, the Participant hereby releases, waives, discharges, and covenants not to sue the studio, its owners, instructors, affiliates, or Phase Change, Inc. from any and all liability, claims, demands, or causes of action arising out of or related to any loss, damage, or injury.
+
+4. MEDICAL CLEARANCE: The Participant certifies that they are physically fit and have no medical conditions that would prevent their full participation. The Participant agrees to bear all costs for any medical care required as a result of participation.
+
+5. MEDIA RELEASE: The Participant grants full permission to the studio and Phase Change, Inc. to use any photographs, motion pictures, recordings, or any other record of the programs for any legitimate purpose, including commercial advertising, without further compensation.
+
+6. REFUND POLICY: All sales are final. Phase Change, Inc. reserves the right to refuse refunds, exchanges, or transfers once a transaction is processed.
+
+THIS DOCUMENT IS A LEGALLY BINDING CONTRACT. BY CHECKING THE BOX BELOW, YOU AFFIRM THAT YOU HAVE READ, UNDERSTOOD, AND AGREED TO ALL TERMS STATED ABOVE IN FULL.
+'''
+    st.text_area("Legal Terms & Conditions", value=legal_disclaimer, height=250, disabled=True)
+    cb_legal = st.checkbox("I have read, understood, and accept the Binding Agreement and Waiver of Liability, acknowledging Phase Change, Inc as the sole billing entity.")
+
     st.write("")
     col1, col2 = st.columns(2)
     with col1: st.button("Back", use_container_width=True, on_click=navigate, args=("classes",))
     with col2:
-        if cb1 and cb2: st.link_button(f"💳 Pay via Stripe", url=checkout_url, use_container_width=True, type="primary")
+        if cb_legal: st.link_button(f"💳 Pay via Stripe", url=checkout_url, use_container_width=True, type="primary")
         else: st.button(f"💳 Pay via Stripe", use_container_width=True, type="primary", disabled=True)
 
 elif st.session_state.app_state == "success":
@@ -752,6 +648,11 @@ elif st.session_state.app_state == "admin_dashboard":
         st.info("No students yet. They'll appear here as soon as someone registers or pays.")
     else:
         df_students = pd.DataFrame(st.session_state.student_db)
+        # Ensure all columns exist
+        for col in REQUIRED_COLUMNS:
+            if col not in df_students.columns:
+                df_students[col] = "-"
+                
         paid_count = int((df_students.get("Status", pd.Series(dtype=str)) == "Paid ✅").sum())
         m1, m2 = st.columns(2)
         m1.metric("Total Students", len(df_students))
@@ -769,45 +670,48 @@ elif st.session_state.app_state == "admin_dashboard":
                 except (TypeError, ValueError):
                     fee_display = "-"
                 badge = "✅" if status == "Paid ✅" else "⏳"
-                with st.expander(f"{badge} {row.get('Name', 'Unknown')} — {row.get('Class', '-')}"):
+                with st.expander(f"{badge} {row.get('Name', 'Unknown')} — {row.get('Class', '-')} ({row.get('Start Date', '-')})"):
                     pc1, pc2 = st.columns(2)
                     with pc1:
                         st.markdown(f"**Name:** {row.get('Name', '-')}")
                         st.markdown(f"**Email:** {row.get('Email', '-')}")
                         st.markdown(f"**Program:** {row.get('Class', '-')} (#{row.get('Program Number', '-')})")
+                        st.markdown(f"**Start Date:** {row.get('Start Date', '-')}")
                         st.markdown(f"**Status:** {status}")
                     with pc2:
                         st.markdown(f"**Fee:** {fee_display}")
                         st.markdown(f"**Registered:** {row.get('Timestamp', '-')}")
                         st.markdown(f"**Portal Login Set:** {'Yes' if row.get('PasswordHash') else 'No'}")
                         
-                        # --- NEW: Delete Record Button ---
-                        st.write("") # Spacer
-                        if st.button("🗑️ Delete Record", key=f"del_{row.get('Email', 'unknown')}_{_}"):
+                        st.write("") 
+                        # Hardened Delete Record Button
+                        delete_key = f"del_{row.get('Email', 'unk')}_{row.get('Timestamp', 't')}"
+                        if st.button("🗑️ Delete Record", key=delete_key):
                             target_email = row.get("Email")
+                            target_time = row.get("Timestamp")
                             if target_email:
                                 lock = filelock.FileLock(f"{DB_FILE}.lock")
                                 with lock:
                                     if os.path.exists(DB_FILE):
-                                        # Read current DB, filter out the deleted email, and save
                                         df_current = pd.read_csv(DB_FILE)
-                                        df_current = df_current[df_current['Email'] != target_email]
+                                        # Strict matching to avoid deleting multiple entries if emails duplicate
+                                        df_current = df_current[~((df_current['Email'] == target_email) & (df_current['Timestamp'] == target_time))]
                                         df_current.to_csv(DB_FILE, index=False)
                                         _secure_chmod(DB_FILE)
-                                        
-                                        # Update session state to reflect changes instantly
                                         st.session_state.student_db = df_current.to_dict('records')
                                 
                                 st.success(f"Record for {target_email} deleted.")
                                 st.rerun()
         else:
+            # Download full current DB as CSV including everything but hashed passwords for security view
             st.dataframe(
                 df_students.drop(columns=["PasswordSalt", "PasswordHash"], errors="ignore"),
                 use_container_width=True
             )
-            st.caption("Passwords are hashed and hidden here for security. Use the CSV export below if you need the full raw record.")
+            
+            # Full DB Export
             st.download_button(
-                "⬇️ Export students CSV",
+                "⬇️ Export Full Students CSV (Backup)",
                 data=df_students.to_csv(index=False).encode("utf-8"),
                 file_name="bollyfusion_students_export.csv",
                 mime="text/csv"
@@ -815,28 +719,30 @@ elif st.session_state.app_state == "admin_dashboard":
 
     st.divider()
     
-    # --- NEW: Database Restore Feature ---
-    st.markdown('<div class="bf-section-title"><h2>Restore Database</h2><p class="bf-muted">Upload a previously exported CSV to restore student records if the server resets.</p></div>', unsafe_allow_html=True)
+    # Hardened Restore Database Section
+    st.markdown('<div class="bf-section-title"><h2>Restore / Upload Database</h2><p class="bf-muted">Upload a previously exported CSV to safely restore student records.</p></div>', unsafe_allow_html=True)
     uploaded_csv = st.file_uploader("Upload bollyfusion_students_export.csv", type=["csv"])
     
     if uploaded_csv is not None:
-        if st.button("⚠️ Confirm Restore (Overwrites Current Data)", type="primary"):
-            try:
-                # Read the uploaded file
-                df_restored = pd.read_csv(uploaded_csv)
-                
-                # Lock and write to the local file
-                lock = filelock.FileLock(f"{DB_FILE}.lock")
-                with lock:
-                    df_restored.to_csv(DB_FILE, index=False)
-                    _secure_chmod(DB_FILE)
-                
-                # Update the session state immediately
-                st.session_state.student_db = df_restored.to_dict('records')
-                st.success("✅ Database restored successfully!")
-                st.rerun()
-            except Exception as e:
-                st.error(f"Failed to restore database: {e}")
+        try:
+            df_uploaded = pd.read_csv(uploaded_csv)
+            # Validate essential columns
+            missing_cols = [col for col in REQUIRED_COLUMNS if col not in df_uploaded.columns]
+            if missing_cols:
+                st.error(f"Upload Failed: CSV is missing required columns: {', '.join(missing_cols)}")
+            else:
+                st.success("CSV format verified. Ready to restore.")
+                if st.button("⚠️ Confirm Restore (Overwrites Current Data)", type="primary"):
+                    lock = filelock.FileLock(f"{DB_FILE}.lock")
+                    with lock:
+                        df_uploaded.to_csv(DB_FILE, index=False)
+                        _secure_chmod(DB_FILE)
+                    
+                    st.session_state.student_db = df_uploaded.to_dict('records')
+                    st.success("✅ Database restored successfully!")
+                    st.rerun()
+        except Exception as e:
+            st.error(f"Failed to read CSV: {e}")
                 
     st.write("")
     if st.button("Logout", use_container_width=True, on_click=navigate, args=("home",)): pass
