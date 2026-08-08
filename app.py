@@ -490,57 +490,47 @@ if st.session_state.app_state == "home":
     event_ps = _event_programs()
     cardio_ps = _cardio_programs()
 
-    faq_database = [
-    {
-        "q": "Where is the studio located?",
-        "kw": ["location", "where", "address", "studio", "directions", "erie", "pa", "located", "city", "street", "parking", "find", "gps", "drive", "commute", "map"],
-        "a": "We are conveniently located at 2727 W 21st St, Erie, PA 16506. We offer an accessible, welcoming space to learn and grow. We can't wait to see you in the studio!"
-    },
-    {
-        "q": "What programs / levels do you offer?",
-        "kw": ["program", "level", "class", "offer", "options", "types", "teach", "learn", "courses", "schedule", "syllabus", "fit", "choose", "what should I take"],
-        "a": f"We currently offer: **{names_str}**. Whether you are taking your very first step or preparing for the stage, we have a curriculum designed specifically for your stage of growth. Tap 'Browse Program Options' to find your perfect fit."
-    },
-    {
-        "q": "How much do classes cost?",
-        "kw": ["price", "cost", "fee", "how much", "expensive", "pricing", "pay", "dollars", "rate", "tuition", "charge", "payment", "affordable", "value", "investment"],
-        "a": f"We offer flexible tuition ranges from **{_fee_range()}** for the full term, scaled to your level and timeline. Think of it as an investment in your health, confidence, and community. Tap 'Browse Program Options' to view exact, transparent pricing per class."
-    },
-    {
-        "q": "What is Bollywood dance / cardio style like?",
-        "kw": ["what is bollywood", "style", "what kind of dance", "dance", "genre", "culture", "indian", "history", "about bollywood", "cardio", "fitness", "workout", "exercise", "weight loss", "health", "sweat", "energy"],
-        "a": "Imagine the high-energy, cinematic choreography of Indian films blended with hip-hop, folk, and classical movement. It is vibrant, highly expressive, and an incredible full-body cardio workout disguised as an unforgettable dance party."
-    },
-    {
-        "q": "What ages do you teach?",
-        "kw": ["age", "kid", "child", "children", "young", "adult", "teen", "toddler", "old", "years old", "youth", "too old", "senior", "age limit"],
-        "a": (f"Dance is for everyone! We welcome adults in most programs, plus a dedicated **{kids_p['name']}** class for our younger rising stars." if kids_p 
-              else "Our current community is proudly designed for teens and adults of all ages. Check 'Browse Program Options' to see the age focus for each specific level—you belong here!")
-    },
-    {
-        "q": "Do I need prior dance experience?",
-        "kw": ["experience", "beginner", "never danced", "background", "new to dance", "first time", "novice", "amateur", "hard", "difficult", "two left feet", "nervous", "scared", "clumsy", "afraid"],
-        "a": "Absolutely not! Have 'two left feet'? You are exactly who our entry-level classes are built for. We break down every single movement in a judgment-free zone. As your confidence and skill grow, our upper levels will be waiting to challenge you."
-    },
-    {
-        "q": "What should I wear to class?",
-        "kw": ["wear", "outfit", "clothes", "attire", "shoes", "dress code", "sneakers", "barefoot", "gear", "prepare", "bring", "water", "uniform"],
-        "a": "Wear whatever makes you feel comfortable, confident, and ready to move! Breathable activewear and supportive sneakers are best. Bring a water bottle, avoid restrictive clothing, and get ready to sweat!"
-    },
-    {
-        "q": "How long is each program / how many weeks?",
-        "kw": ["weeks", "duration", "long", "term", "how many classes", "schedule", "time", "length", "dates", "semester", "session", "commitment"],
-        "a": "We offer timelines to fit your lifestyle, generally ranging from 10 to 20 weeks per term. This allows you to truly master the choreography and bond with your class. Exact start dates and durations are listed under 'Browse Program Options'."
-    },
-    {
-        "q": "Do you host performances or showcase events?",
-        "kw": ["event", "performance", "showcase", "recital", "perform", "stage", "show", "audience", "live", "costume", "gala", "watch"],
-        "a": "Yes! The stage is a thrilling part of the journey. Several of our programs culminate in live, high-production showcases to celebrate your hard work. Details and any event fees are clearly listed per program on the pricing page."
-    },
-    {
-        "q": "How many songs will we learn?",
-        "kw": ["songs", "how many routines", "choreography count", "music", "routine", "dance to", "track", "number", "medley"],
-        "a": ("You'll build a fantastic repertoire. Shorter terms typically master 2-3 routines, while our full 20-week immersive terms conquer 4-5 complete choreographies" + (f"—for example, our **{AVAILABLE_PROGRAMS[0]['name']}** program covers {AVAILABLE_PROGRAMS[0]['song_count']} distinct songs." if AVAILABLE_PROGRAMS else "."))}
+    FAQS = [
+        {"q": "Where is the studio located?",
+         "kw": ["location", "where", "address", "studio", "directions", "erie", "pa", "located", "city", "street"],
+         "a": "We are located at 2727 W 21st St, Erie, PA 16506."},
+         
+        {"q": "What programs / levels do you offer?",
+         "kw": ["program", "level", "class", "offer", "options", "types", "teach", "learn", "courses"],
+         "a": f"We currently offer: **{names_str}**. Each is designed for a different stage — from first-timers to performance-ready dancers. Tap 'Browse Program Options' to see full details."},
+        
+        {"q": "How much do classes cost?",
+         "kw": ["price", "cost", "fee", "how much", "expensive", "pricing", "pay", "dollars", "rate", "tuition", "charge"],
+         "a": f"Program fees range from **{_fee_range()}** for the full term, depending on the level and number of weeks. Tap 'Browse Program Options' for exact pricing per class."},
+         
+        {"q": "What is Bollywood dance / cardio style like?",
+         "kw": ["what is bollywood", "style", "what kind of dance", "dance", "genre", "culture", "indian", "history", "about bollywood", "cardio", "fitness", "workout", "exercise"],
+         "a": "Bollywood dance blends high-energy cinematic choreography from Indian films with elements of hip-hop, folk, and classical Indian movement — it's fun, expressive, and an amazing full-body cardio workout disguised as dance."},
+         
+        {"q": "What ages do you teach?",
+         "kw": ["age", "kid", "child", "children", "young", "adult", "teen", "toddler", "old", "years old"],
+         "a": (f"We welcome adults in most programs, plus a dedicated **{kids_p['name']}** class for younger dancers." if kids_p
+               else "Our programs are primarily designed for teens and adults — check Browse Program Options for the age focus of each level.")},
+               
+        {"q": "Do I need prior dance experience?",
+         "kw": ["experience", "beginner", "never danced", "background", "new to dance", "first time", "novice", "amateur", "hard", "difficult"],
+         "a": "Not at all! Our entry-level classes are built for total beginners — no dance background needed. As you progress, later levels add more technical choreography."},
+         
+        {"q": "What should I wear to class?",
+         "kw": ["wear", "outfit", "clothes", "attire", "shoes", "dress code", "sneakers", "barefoot"],
+         "a": "Comfortable, breathable workout clothes and supportive sneakers or dance sneakers work best. Avoid anything restrictive — you'll be moving a lot!"},
+         
+        {"q": "How long is each program / how many weeks?",
+         "kw": ["weeks", "duration", "long", "term", "how many classes", "schedule", "time", "length"],
+         "a": "Program length varies by level, generally ranging from 10 to 20 weeks per term. Exact durations and available start dates for each program are shown on the 'Browse Program Options' page."},
+         
+        {"q": "Do you host performances or showcase events?",
+         "kw": ["event", "performance", "showcase", "recital", "perform", "stage", "show"],
+         "a": "Yes! Several programs include live events and showcases through the year — details and any event fees are listed per program on the pricing page."},
+         
+        {"q": "How many songs will we learn?",
+         "kw": ["songs", "how many routines", "choreography count", "music", "routine", "dance to"],
+         "a": ("Shorter terms typically cover 2-3 songs, while full 20-week terms cover 4-5 full routines" + (f" — for example, **{AVAILABLE_PROGRAMS[0]['name']}** covers {AVAILABLE_PROGRAMS[0]['song_count']}." if AVAILABLE_PROGRAMS else "."))}
     ]
 
     def _match_faq(user_text):
