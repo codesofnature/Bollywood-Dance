@@ -733,6 +733,18 @@ elif st.session_state.app_state == "student_dashboard":
         st.session_state.logged_in_student = None
         navigate("home")
 
+elif st.session_state.app_state == "admin_login":
+    a_user = st.text_input("Username")
+    a_pass = st.text_input("Password", type="password")
+    col1, col2 = st.columns(2)
+    with col1: st.button("Cancel", use_container_width=True, on_click=navigate, args=("home",))
+    with col2:
+        if st.button("Login", use_container_width=True, type="primary"):
+            if secrets.compare_digest(a_user, st.secrets.get("admin_username", "")) and secrets.compare_digest(a_pass, st.secrets.get("admin_password", "")):
+                navigate("admin_dashboard")
+                st.rerun()
+            else: st.error("Invalid credentials.")
+
 elif st.session_state.app_state == "admin_dashboard":
     st.markdown('<div class="bf-section-title"><h2>Registered Students</h2><p class="bf-muted">Full profile for every student who has registered or paid.</p></div>', unsafe_allow_html=True)
 
@@ -774,41 +786,12 @@ elif st.session_state.app_state == "admin_dashboard":
                 use_container_width=True
             )
             st.caption("Passwords are hashed and hidden here for security. Use the CSV export below if you need the full raw record.")
-            
             st.download_button(
                 "⬇️ Export students CSV",
                 data=df_students.to_csv(index=False).encode("utf-8"),
                 file_name="bollyfusion_students_export.csv",
                 mime="text/csv"
             )
-
-    st.divider()
-    
-    # --- NEW: Database Restore Feature ---
-    st.subheader("Database Management")
-    st.markdown("If the Streamlit Cloud server restarts and clears the local database, you can upload your most recent CSV backup here to restore it.")
-    
-    with st.expander("Upload CSV Backup"):
-        uploaded_file = st.file_uploader("Upload bollyfusion_students_export.csv", type=["csv"])
-        if uploaded_file is not None:
-            try:
-                restored_df = pd.read_csv(uploaded_file)
-                # Quick validation to ensure it's the right file format
-                if "Email" in restored_df.columns and "Name" in restored_df.columns:
-                    if st.button("Confirm & Restore Database", type="primary"):
-                        lock = filelock.FileLock(f"{DB_FILE}.lock")
-                        with lock:
-                            # Save the uploaded file as the active database
-                            restored_df.to_csv(DB_FILE, index=False)
-                            # Update session state so the UI reflects the changes instantly
-                            st.session_state.student_db = restored_df.to_dict('records')
-                            _secure_chmod(DB_FILE)
-                        st.success("Database restored successfully!")
-                        st.rerun()
-                else:
-                    st.error("Invalid CSV format. Please upload a valid BollyFusion student export.")
-            except Exception as e:
-                st.error(f"Error reading CSV: {e}")
 
     st.write("")
     if st.button("Logout", use_container_width=True, on_click=navigate, args=("home",)): pass
