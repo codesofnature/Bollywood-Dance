@@ -793,5 +793,30 @@ elif st.session_state.app_state == "admin_dashboard":
                 mime="text/csv"
             )
 
+    st.divider()
+    
+    # --- NEW: Database Restore Feature ---
+    st.markdown('<div class="bf-section-title"><h2>Restore Database</h2><p class="bf-muted">Upload a previously exported CSV to restore student records if the server resets.</p></div>', unsafe_allow_html=True)
+    uploaded_csv = st.file_uploader("Upload bollyfusion_students_export.csv", type=["csv"])
+    
+    if uploaded_csv is not None:
+        if st.button("⚠️ Confirm Restore (Overwrites Current Data)", type="primary"):
+            try:
+                # Read the uploaded file
+                df_restored = pd.read_csv(uploaded_csv)
+                
+                # Lock and write to the local file
+                lock = filelock.FileLock(f"{DB_FILE}.lock")
+                with lock:
+                    df_restored.to_csv(DB_FILE, index=False)
+                    _secure_chmod(DB_FILE)
+                
+                # Update the session state immediately
+                st.session_state.student_db = df_restored.to_dict('records')
+                st.success("✅ Database restored successfully!")
+                st.rerun()
+            except Exception as e:
+                st.error(f"Failed to restore database: {e}")
+                
     st.write("")
     if st.button("Logout", use_container_width=True, on_click=navigate, args=("home",)): pass
