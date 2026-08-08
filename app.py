@@ -303,7 +303,6 @@ if "student_db" not in st.session_state:
     if os.path.exists(DB_FILE):
         try:
             df = pd.read_csv(DB_FILE)
-            # Ensure new columns exist for legacy databases
             for col in REQUIRED_COLUMNS:
                 if col not in df.columns:
                     df[col] = "-" if col != "Fee" else 0.0
@@ -441,7 +440,7 @@ if st.session_state.app_state == "home":
             <div class="bf-hero-media"><img src="https://github.com/codesofnature/Bollywood-Dance/blob/4dcb2186d5a9907998e63d390443477be4ce7bae/s1.jpg?raw=true" alt="Dancers performing a traditional Bollywood routine"/></div>
             <div class="bf-hero-media"><img src="https://github.com/codesofnature/Bollywood-Dance/blob/4dcb2186d5a9907998e63d390443477be4ce7bae/s2.jpg?raw=true" alt="Group dancing on stage in colorful costume"/></div>
             <div class="bf-hero-media"><img src="https://github.com/codesofnature/Bollywood-Dance/blob/4dcb2186d5a9907998e63d390443477be4ce7bae/s3.jpg?raw=true" alt="High-energy Bollywood performance"/></div>
-            <div class="bf-hero-media"><img src="https://github.com/codesofnature/Bollywood-Dance/blob/4dcb2186d5a9907998e63d390443477be4ce7bae/s4.jpg?raw=true alt="Dancers in traditional festive dress"/></div>
+            <div class="bf-hero-media"><img src="https://github.com/codesofnature/Bollywood-Dance/blob/4dcb2186d5a9907998e63d390443477be4ce7bae/s4.jpg?raw=true" alt="Dancers in traditional festive dress"/></div>
             <div class="bf-hero-media"><img src="https://github.com/codesofnature/Bollywood-Dance/blob/4dcb2186d5a9907998e63d390443477be4ce7bae/s5.jpg?raw=true" alt="Dancer in traditional Indian attire mid-performance"/></div>
         </div>
         <div class="bf-hero-inner">
@@ -460,23 +459,105 @@ if st.session_state.app_state == "home":
 
     st.write("")
 
+    # --- FAQ knowledge base: dynamically aware of the studio's actual offered programs ---
+    def _fmt_money(v):
+        return f"\\${v:,.0f}" if float(v) == int(v) else f"\\${v:,.2f}"
+
+    def _program_names():
+        return [p["name"] for p in AVAILABLE_PROGRAMS] if AVAILABLE_PROGRAMS else []
+
+    def _fee_range():
+        if not AVAILABLE_PROGRAMS: return "please check Browse Program Options"
+        fees = [p["fee"] for p in AVAILABLE_PROGRAMS]
+        return f"{_fmt_money(min(fees))} to {_fmt_money(max(fees))}" if min(fees) != max(fees) else _fmt_money(fees[0])
+
+    def _kids_program():
+        return next((p for p in AVAILABLE_PROGRAMS if "kid" in p["name"].lower()), None)
+
+    def _event_programs():
+        return [p for p in AVAILABLE_PROGRAMS if any(k in p["name"].lower() for k in ["event", "couple"])]
+
+    def _company_program():
+        return next((p for p in AVAILABLE_PROGRAMS if any(k in p["name"].lower() for k in ["premier", "company"])), None)
+
+    def _cardio_programs():
+        return [p for p in AVAILABLE_PROGRAMS if "cardio" in p["name"].lower()]
+
+    names = _program_names()
+    names_str = ", ".join(names) if names else "our current programs (see Browse Program Options)"
+    kids_p = _kids_program()
+    company_p = _company_program()
+    event_ps = _event_programs()
+    cardio_ps = _cardio_programs()
+
     FAQS = [
-        {"q": "What programs / levels do you offer?", "kw": ["program", "level", "class", "offer", "options", "types"], "a": "We offer a variety of cinematic dance programs for all levels. Tap 'Browse Program Options' to see full details."},
+        {"q": "Where is the studio located?",
+         "kw": ["location", "where", "address", "studio", "directions", "erie", "pa", "located", "city", "street"],
+         "a": "We are located at **2727 W 21st St, Erie, PA 16506**."},
+         
+        {"q": "What programs / levels do you offer?",
+         "kw": ["program", "level", "class", "offer", "options", "types", "teach", "learn", "courses"],
+         "a": f"We currently offer: **{names_str}**. Each is designed for a different stage — from first-timers to performance-ready dancers. Tap 'Browse Program Options' to see full details."},
+        
+        {"q": "How much do classes cost?",
+         "kw": ["price", "cost", "fee", "how much", "expensive", "pricing", "pay", "dollars", "rate", "tuition", "charge"],
+         "a": f"Program fees range from **{_fee_range()}** for the full term, depending on the level and number of weeks. Tap 'Browse Program Options' for exact pricing per class."},
+         
+        {"q": "What is Bollywood dance / cardio style like?",
+         "kw": ["what is bollywood", "style", "what kind of dance", "genre", "culture", "indian", "history", "about bollywood", "cardio", "fitness", "workout", "exercise"],
+         "a": "Bollywood dance blends high-energy cinematic choreography from Indian films with elements of hip-hop, folk, and classical Indian movement — it's fun, expressive, and an amazing full-body cardio workout disguised as dance."},
+         
+        {"q": "What ages do you teach?",
+         "kw": ["age", "kid", "child", "children", "young", "adult", "teen", "toddler", "old", "years old"],
+         "a": (f"We welcome adults in most programs, plus a dedicated **{kids_p['name']}** class for younger dancers." if kids_p
+               else "Our programs are primarily designed for teens and adults — check Browse Program Options for the age focus of each level.")},
+               
+        {"q": "Do I need prior dance experience?",
+         "kw": ["experience", "beginner", "never danced", "background", "new to dance", "first time", "novice", "amateur", "hard", "difficult"],
+         "a": "Not at all! Our entry-level classes are built for total beginners — no dance background needed. As you progress, later levels add more technical choreography."},
+         
+        {"q": "What should I wear to class?",
+         "kw": ["wear", "outfit", "clothes", "attire", "shoes", "dress code", "sneakers", "barefoot"],
+         "a": "Comfortable, breathable workout clothes and supportive sneakers or dance sneakers work best. Avoid anything restrictive — you'll be moving a lot!"},
+         
+        {"q": "How long is each program / how many weeks?",
+         "kw": ["weeks", "duration", "long", "term", "how many classes", "schedule", "time", "length"],
+         "a": "Program length varies by level, generally ranging from 10 to 20 weeks per term. Exact durations and available start dates for each program are shown on the 'Browse Program Options' page."},
+         
+        {"q": "Do you host performances or showcase events?",
+         "kw": ["event", "performance", "showcase", "recital", "perform", "stage", "show"],
+         "a": "Yes! Several programs include live events and showcases through the year — details and any event fees are listed per program on the pricing page."},
+         
+        {"q": "How many songs will we learn?",
+         "kw": ["songs", "how many routines", "choreography count", "music", "routine", "dance to"],
+         "a": ("Shorter terms typically cover 2-3 songs, while full 20-week terms cover 4-5 full routines" + (f" — for example, **{AVAILABLE_PROGRAMS[0]['name']}** covers {AVAILABLE_PROGRAMS[0]['song_count']}." if AVAILABLE_PROGRAMS else "."))}
     ]
 
     def _match_faq(user_text):
         text = user_text.lower()
+        # Strip punctuation for cleaner, smarter matching
+        text = re.sub(r'[^\w\s]', '', text)
+        
         best, best_score = None, 0
+        
         for item in FAQS:
-            score = sum(1 for kw in item["kw"] if kw in text)
+            score = 0
+            for kw in item["kw"]:
+                kw_clean = kw.lower()
+                # 2 points for an exact word boundary match (e.g., "fee" won't falsely match "coffee")
+                if re.search(r'\b' + re.escape(kw_clean) + r'\b', text):
+                    score += 2
+                # 1 point for a partial substring match as a fallback
+                elif kw_clean in text:
+                    score += 1
+                    
             if score > best_score:
                 best, best_score = item, score
+                
         return best if best_score > 0 else None
 
     if "chat_history" not in st.session_state:
-        st.session_state.chat_history = [{"role": "assistant", "content": "Hi! 👋 Ask me about our programs, pricing, schedules, attire, or anything else about the studio."}]
-    if "chat_failed_attempts" not in st.session_state:
-        st.session_state.chat_failed_attempts = 0
+        st.session_state.chat_history = [{"role": "assistant", "content": "Hi! 👋 Ask me about our programs, pricing, schedule, location, or anything else about the studio."}]
     if "chat_open" not in st.session_state:
         st.session_state.chat_open = False
 
@@ -497,19 +578,19 @@ if st.session_state.app_state == "home":
                     </div>
                 ''', unsafe_allow_html=True)
 
-            prompt = st.chat_input("Ask about programs, pricing, schedule...")
+            prompt = st.chat_input("Ask about programs, location, pricing...")
             if prompt:
                 st.session_state.chat_history.append({"role": "user", "content": prompt})
+                
+                # Smart Match Execution
                 match = _match_faq(prompt)
+                
                 if match:
                     answer = match["a"]
-                    st.session_state.chat_failed_attempts = 0
                 else:
-                    st.session_state.chat_failed_attempts += 1
-                    if st.session_state.chat_failed_attempts >= 3:
-                        answer = "I'm sorry, I couldn't find a good answer to your recent questions. **Please call our support at 2341239239** for immediate assistance."
-                    else:
-                        answer = "I'm not quite sure about that. Try asking about programs, pricing, age groups, attire, schedule, or events!"
+                    # Immediate phone number fallback if it cannot confidently answer
+                    answer = "I'm sorry, I don't have the exact answer for that. **Please call our support at 2341239239** for immediate assistance."
+                
                 st.session_state.chat_history.append({"role": "assistant", "content": answer})
                 st.rerun()
 
